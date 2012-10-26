@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="authentication-page">
 
   <div class="wrapper">
@@ -192,7 +208,7 @@ def example_view(request, format=None):
 token = Token.objects.create(user=...)
 print token.key
 </code></pre>
-<p>For clients to authenticate, the token key should be included in the <code>Authorization</code> HTTP header.  The key should be prefixed by the string literal "Token", with whitespace seperating the two strings.  For example:</p>
+<p>For clients to authenticate, the token key should be included in the <code>Authorization</code> HTTP header.  The key should be prefixed by the string literal "Token", with whitespace separating the two strings.  For example:</p>
 <pre class="prettyprint lang-py"><code>Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 </code></pre>
 <p>If successfully authenticated, <code>TokenAuthentication</code> provides the following credentials.</p>

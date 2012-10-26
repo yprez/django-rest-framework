@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="exceptions-page">
 
   <div class="wrapper">
@@ -147,7 +163,7 @@
 <pre class="prettyprint lang-py"><code>DELETE http://api.example.com/foo/bar HTTP/1.1
 Accept: application/json
 </code></pre>
-<p>Might recieve an error response indicating that the <code>DELETE</code> method is not allowed on that resource:</p>
+<p>Might receive an error response indicating that the <code>DELETE</code> method is not allowed on that resource:</p>
 <pre class="prettyprint lang-py"><code>HTTP/1.1 405 Method Not Allowed
 Content-Type: application/json; charset=utf-8
 Content-Length: 42

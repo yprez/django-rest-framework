@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="fields-page">
 
   <div class="wrapper">
@@ -120,6 +136,7 @@
 <li class="main"><a href="#typed-fields">Typed Fields</a></li>
 <li><a href="#booleanfield">BooleanField</a></li>
 <li><a href="#charfield">CharField</a></li>
+<li><a href="#choicefield">ChoiceField</a></li>
 <li><a href="#emailfield">EmailField</a></li>
 <li><a href="#datefield">DateField</a></li>
 <li><a href="#datetimefield">DateTimeField</a></li>
@@ -171,7 +188,7 @@
     class Meta:
         fields = ('url', 'owner', 'name', 'expired')
 </code></pre>
-<p>Would produced output similar to:</p>
+<p>Would produce output similar to:</p>
 <pre class="prettyprint lang-py"><code>{
     'url': 'http://example.com/api/accounts/3/',
     'owner': 'http://example.com/api/users/12/',
@@ -179,7 +196,7 @@
     'expired': True
 }
 </code></pre>
-<p>Be default, the <code>Field</code> class will perform a basic translation of the source value into primative datatypes, falling back to unicode representations of complex datatypes when neccesary.</p>
+<p>By default, the <code>Field</code> class will perform a basic translation of the source value into primative datatypes, falling back to unicode representations of complex datatypes when necessary.</p>
 <p>You can customize this  behaviour by overriding the <code>.to_native(self, value)</code> method.</p>
 <h2 id="writablefield">WritableField</h2>
 <p>A field that supports both read and write operations.  By itself <code>WriteableField</code> does not perform any translation of input values into a given type.  You won't typically use this field directly, but you may want to override it and implement the <code>.to_native(self, value)</code> and <code>.from_native(self, value)</code> methods.</p>
@@ -190,21 +207,30 @@
 <h1 id="typed-fields">Typed Fields</h1>
 <p>These fields represent basic datatypes, and support both reading and writing values.</p>
 <h2 id="booleanfield">BooleanField</h2>
-<p>A Boolean representation, corresponds to <code>django.db.models.fields.BooleanField</code>.</p>
+<p>A Boolean representation.</p>
+<p>Corresponds to <code>django.db.models.fields.BooleanField</code>.</p>
 <h2 id="charfield">CharField</h2>
-<p>A text representation, optionally validates the text to be shorter than <code>max_length</code> and longer than <code>min_length</code>, corresponds to <code>django.db.models.fields.CharField</code>
+<p>A text representation, optionally validates the text to be shorter than <code>max_length</code> and longer than <code>min_length</code>.</p>
+<p>Corresponds to <code>django.db.models.fields.CharField</code>
 or <code>django.db.models.fields.TextField</code>.</p>
-<p><strong>Signature:</strong> <code>CharField([max_length=&lt;Integer&gt;[, min_length=&lt;Integer&gt;]])</code></p>
+<p><strong>Signature:</strong> <code>CharField(max_length=None, min_length=None)</code></p>
+<h2 id="choicefield">ChoiceField</h2>
+<p>A field that can accept a value out of a limited set of choices.</p>
 <h2 id="emailfield">EmailField</h2>
-<p>A text representation, validates the text to be a valid e-mail adress. Corresponds to <code>django.db.models.fields.EmailField</code></p>
+<p>A text representation, validates the text to be a valid e-mail address.</p>
+<p>Corresponds to <code>django.db.models.fields.EmailField</code></p>
 <h2 id="datefield">DateField</h2>
-<p>A date representation. Corresponds to <code>django.db.models.fields.DateField</code></p>
+<p>A date representation.</p>
+<p>Corresponds to <code>django.db.models.fields.DateField</code></p>
 <h2 id="datetimefield">DateTimeField</h2>
-<p>A date and time representation. Corresponds to <code>django.db.models.fields.DateTimeField</code></p>
+<p>A date and time representation.</p>
+<p>Corresponds to <code>django.db.models.fields.DateTimeField</code></p>
 <h2 id="integerfield">IntegerField</h2>
-<p>An integer representation. Corresponds to <code>django.db.models.fields.IntegerField</code>, <code>django.db.models.fields.SmallIntegerField</code>, <code>django.db.models.fields.PositiveIntegerField</code> and <code>django.db.models.fields.PositiveSmallIntegerField</code></p>
+<p>An integer representation.</p>
+<p>Corresponds to <code>django.db.models.fields.IntegerField</code>, <code>django.db.models.fields.SmallIntegerField</code>, <code>django.db.models.fields.PositiveIntegerField</code> and <code>django.db.models.fields.PositiveSmallIntegerField</code></p>
 <h2 id="floatfield">FloatField</h2>
-<p>A floating point representation. Corresponds to <code>django.db.models.fields.FloatField</code>.</p>
+<p>A floating point representation.</p>
+<p>Corresponds to <code>django.db.models.fields.FloatField</code>.</p>
 <hr />
 <h1 id="relational-fields">Relational Fields</h1>
 <p>Relational fields are used to represent model relationships.  They can be applied to <code>ForeignKey</code>, <code>ManyToManyField</code> and <code>OneToOneField</code> relationships, as well as to reverse relationships, and custom relationships such as <code>GenericForeignKey</code>.</p>
@@ -257,7 +283,7 @@ class Bookmark(models.Model):
         model = Bookmark
         exclude = ('id',)
 </code></pre>
-<p>The an example output format for a Bookmark instance would be:</p>
+<p>Then an example output format for a Bookmark instance would be:</p>
 <pre class="prettyprint lang-py"><code>{
     'tags': [u'django', u'python'],
     'url': u'https://www.djangoproject.com/'

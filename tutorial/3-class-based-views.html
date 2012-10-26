@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="3-class-based-views-page">
 
   <div class="wrapper">
@@ -217,7 +233,7 @@ class CommentRoot(mixins.ListModelMixin,
         return self.create(request, *args, **kwargs)
 </code></pre>
 <p>We'll take a moment to examine exactly what's happening here - We're building our view using <code>MultipleObjectBaseView</code>, and adding in <code>ListModelMixin</code> and <code>CreateModelMixin</code>.</p>
-<p>The base class provides the core functionality, and the mixin classes provide the <code>.list()</code> and <code>.create()</code> actions.  We're then explictly binding the <code>get</code> and <code>post</code> methods to the appropriate actions.  Simple enough stuff so far.</p>
+<p>The base class provides the core functionality, and the mixin classes provide the <code>.list()</code> and <code>.create()</code> actions.  We're then explicitly binding the <code>get</code> and <code>post</code> methods to the appropriate actions.  Simple enough stuff so far.</p>
 <pre class="prettyprint lang-py"><code>class CommentInstance(mixins.RetrieveModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.DestroyModelMixin,

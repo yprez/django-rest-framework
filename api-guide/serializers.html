@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="serializers-page">
 
   <div class="wrapper">
@@ -193,7 +209,25 @@ serializer.object
 </code></pre>
 <h2 id="validation">Validation</h2>
 <p>When deserializing data, you always need to call <code>is_valid()</code> before attempting to access the deserialized object.  If any validation errors occur, the <code>.errors</code> and <code>.non_field_errors</code> properties will contain the resulting error messages.</p>
-<p><strong>TODO: Describe validation in more depth</strong></p>
+<h3 id="field-level-validation">Field-level validation</h3>
+<p>You can specify custom field-level validation by adding <code>validate_&lt;fieldname&gt;()</code> methods to your <code>Serializer</code> subclass. These are analagous to <code>clean_&lt;fieldname&gt;</code> methods on Django forms, but accept slightly different arguments. They take a dictionary of deserialized attributes as a first argument, and the field name in that dictionary as a second argument (which will be either the name of the field or the value of the <code>source</code> argument to the field, if one was provided). Your <code>validate_&lt;fieldname&gt;</code> methods should either just return the attrs dictionary or raise a <code>ValidationError</code>. For example:</p>
+<pre class="prettyprint lang-py"><code>from rest_framework import serializers
+
+class BlogPostSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=100)
+    content = serializers.CharField()
+
+    def validate_title(self, attrs, source):
+        """
+        Check that the blog post is about Django
+        """
+        value = attrs[source]
+        if "Django" not in value:
+            raise serializers.ValidationError("Blog post is not about Django")
+        return attrs
+</code></pre>
+<h3 id="final-cross-field-validation">Final cross-field validation</h3>
+<p>To do any other validation that requires access to multiple fields, add a method called <code>validate</code> to your <code>Serializer</code> subclass. This method takes a single argument, which is the <code>attrs</code> dictionary. It should raise a <code>ValidationError</code> if necessary, or just return <code>attrs</code>.</p>
 <h2 id="dealing-with-nested-objects">Dealing with nested objects</h2>
 <p>The previous example is fine for dealing with objects that only have simple datatypes, but sometimes we also need to be able to represent more complex objects,
 where some of the attributes of an object might not be simple datatypes such as strings, dates or integers.</p>
@@ -274,13 +308,13 @@ The <code>ModelSerializer</code> class lets you automatically create a Serialize
     class Meta:
         model = Account
 </code></pre>
-<p>Extra fields can corrospond to any property or callable on the model.</p>
+<p>Extra fields can correspond to any property or callable on the model.</p>
 <h2 id="relational-fields">Relational fields</h2>
 <p>When serializing model instances, there are a number of different ways you might choose to represent relationships.  The default representation is to use the primary keys of the related instances.</p>
 <p>Alternative representations include serializing using natural keys, serializing complete nested representations, or serializing using a custom representation, such as a URL that uniquely identifies the model instances.</p>
 <p>The <code>PrimaryKeyRelatedField</code> and <code>HyperlinkedRelatedField</code> fields provide alternative flat representations.</p>
 <p>The <code>ModelSerializer</code> class can itself be used as a field, in order to serialize relationships using nested representations.</p>
-<p>The <code>RelatedField</code> class may be subclassed to create a custom represenation of a relationship.  The subclass should override <code>.to_native()</code>, and optionally <code>.from_native()</code> if deserialization is supported.</p>
+<p>The <code>RelatedField</code> class may be subclassed to create a custom representation of a relationship.  The subclass should override <code>.to_native()</code>, and optionally <code>.from_native()</code> if deserialization is supported.</p>
 <p>All the relational fields may be used for any relationship or reverse relationship on a model.</p>
 <h2 id="specifying-which-fields-should-be-included">Specifying which fields should be included</h2>
 <p>If you only want a subset of the default fields to be used in a model serializer, you can do so using <code>fields</code> or <code>exclude</code> options, just as you would with a <code>ModelForm</code>.</p>
@@ -314,7 +348,7 @@ The <code>ModelSerializer</code> class lets you automatically create a Serialize
     def get_related_field(self, model_field, to_many=False):
         queryset = model_field.rel.to._default_manager
         if to_many:
-            return return serializers.ManyRelatedField(queryset=queryset)
+            return serializers.ManyRelatedField(queryset=queryset)
         return serializers.RelatedField(queryset=queryset)
 
     def get_field(self, model_field):

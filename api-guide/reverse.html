@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="reverse-page">
 
   <div class="wrapper">
@@ -127,7 +143,7 @@
 <p>The central feature that distinguishes the REST architectural style from other network-based styles is its emphasis on a uniform interface between components.</p>
 <p>&mdash; Roy Fielding, <a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm#sec_5_1_5">Architectural Styles and the Design of Network-based Software Architectures</a></p>
 </blockquote>
-<p>As a rule, it's probably better practice to return absolute URIs from you Web APIs, such as <code>http://example.com/foobar</code>, rather than returning relative URIs, such as <code>/foobar</code>.</p>
+<p>As a rule, it's probably better practice to return absolute URIs from your Web APIs, such as <code>http://example.com/foobar</code>, rather than returning relative URIs, such as <code>/foobar</code>.</p>
 <p>The advantages of doing so are:</p>
 <ul>
 <li>It's more explicit.</li>

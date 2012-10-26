@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="2-requests-and-responses-page">
 
   <div class="wrapper">
@@ -131,7 +147,7 @@
 <p>From this point we're going to really start covering the core of REST framework.
 Let's introduce a couple of essential building blocks.</p>
 <h2 id="request-objects">Request objects</h2>
-<p>REST framework intoduces a <code>Request</code> object that extends the regular <code>HttpRequest</code>, and provides more flexible request parsing.  The core functionality of the <code>Request</code> object is the <code>request.DATA</code> attribute, which is similar to <code>request.POST</code>, but more useful for working with Web APIs.</p>
+<p>REST framework introduces a <code>Request</code> object that extends the regular <code>HttpRequest</code>, and provides more flexible request parsing.  The core functionality of the <code>Request</code> object is the <code>request.DATA</code> attribute, which is similar to <code>request.POST</code>, but more useful for working with Web APIs.</p>
 <pre class="prettyprint lang-py"><code>request.POST  # Only handles form data.  Only works for 'POST' method.
 request.DATA  # Handles arbitrary data.  Works any HTTP request with content.
 </code></pre>

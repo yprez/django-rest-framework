@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="parsers-page">
 
   <div class="wrapper">
@@ -138,7 +154,7 @@ structured formats for sending data than form-encoded, since they're
 sending more complex data than simple forms</p>
 <p>&mdash; Malcom Tredinnick, <a href="https://groups.google.com/d/topic/django-developers/dxI4qVzrBY4/discussion">Django developers group</a></p>
 </blockquote>
-<p>REST framework includes a number of built in Parser classes, that allow you to accept requests with various media types.  There is also support for defining your own custom parsers, which gives you the flexiblity to design the media types that your API accepts.</p>
+<p>REST framework includes a number of built in Parser classes, that allow you to accept requests with various media types.  There is also support for defining your own custom parsers, which gives you the flexibility to design the media types that your API accepts.</p>
 <h2 id="how-the-parser-is-determined">How the parser is determined</h2>
 <p>The set of valid parsers for a view is always defined as a list of classes.  When either <code>request.DATA</code> or <code>request.FILES</code> is accessed, REST framework will examine the <code>Content-Type</code> header on the incoming request, and determine which parser to use to parse the request content.</p>
 <h2 id="setting-the-parsers">Setting the parsers</h2>
@@ -178,7 +194,7 @@ def example_view(request, format=None):
 <p><strong>.media_type</strong>: <code>application/yaml</code></p>
 <h2 id="xmlparser">XMLParser</h2>
 <p>Parses REST framework's default style of <code>XML</code> request content.</p>
-<p>Note that the <code>XML</code> markup language is used typically used as the base language for more strictly defined domain-specific languages, such as <code>RSS</code>, <code>Atom</code>, and <code>XHTML</code>.</p>
+<p>Note that the <code>XML</code> markup language is typically used as the base language for more strictly defined domain-specific languages, such as <code>RSS</code>, <code>Atom</code>, and <code>XHTML</code>.</p>
 <p>If you are considering using <code>XML</code> for your API, you may want to consider implementing a custom renderer and parser for your specific requirements, and using an existing domain-specific media-type, or creating your own custom XML-based media-type.</p>
 <p><strong>.media_type</strong>: <code>application/xml</code></p>
 <h2 id="formparser">FormParser</h2>

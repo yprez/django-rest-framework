@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>Django REST framework</title>
     <link href="http://tomchristie.github.com/django-rest-framework/img/favicon.ico" rel="icon" type="image/x-icon">
@@ -17,6 +18,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18852272-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+    </script>
+  </head>
   <body onload="prettyPrint()" class="permissions-page">
 
   <div class="wrapper">
@@ -134,7 +150,7 @@
 <p>Authentication or identification by itself is not usually sufficient to gain access to information or code. For that, the entity requesting access must have authorization.</p>
 <p>&mdash; <a href="https://developer.apple.com/library/mac/#documentation/security/Conceptual/AuthenticationAndAuthorizationGuide/Authorization/Authorization.html">Apple Developer Documentation</a></p>
 </blockquote>
-<p>Together with <a href="authentication">authentication</a> and <a href="throttling">throttling</a>, permissions determine wheter a request should be granted or denied access.</p>
+<p>Together with <a href="authentication">authentication</a> and <a href="throttling">throttling</a>, permissions determine whether a request should be granted or denied access.</p>
 <p>Permission checks are always run at the very start of the view, before any other code is allowed to proceed.  Permission checks will typically use the authentication information in the <code>request.user</code> and <code>request.auth</code> properties to determine if the incoming request should be permitted.</p>
 <h2 id="how-permissions-are-determined">How permissions are determined</h2>
 <p>Permissions in REST framework are always defined as a list of permission classes.<br />
