@@ -93,7 +93,7 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/browsable-api">The Browsable API</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-hypermedia-hateoas">REST, Hypermedia & HATEOAS</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/contributing">Contributing to REST framework</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/migration">2.0 Migration Guide</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-framework-2-announcement">2.0 Announcement</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/release-notes">Release Notes</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/credits">Credits</a></li>
                 </ul>
@@ -240,7 +240,7 @@ Unlike other renderers, the data passed to the <code>Response</code> does not ne
 
     def get(self, request, *args, **kwargs)
         self.object = self.get_object()
-        return Response(self.object, template_name='user_detail.html')
+        return Response({'user': self.object}, template_name='user_detail.html')
 </code></pre>
 <p>You can use <code>HTMLRenderer</code> either to return regular HTML pages using REST framework, or to return both HTML and API responses from a single endpoint.</p>
 <p>If you're building websites that use <code>HTMLRenderer</code> along with other renderer classes, you should consider listing <code>HTMLRenderer</code> as the first class in the <code>renderer_classes</code> list, so that it will be prioritised first even for browsers that send poorly formed <code>ACCEPT:</code> headers.</p>

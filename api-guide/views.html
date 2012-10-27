@@ -93,7 +93,7 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/browsable-api">The Browsable API</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-hypermedia-hateoas">REST, Hypermedia & HATEOAS</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/contributing">Contributing to REST framework</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/migration">2.0 Migration Guide</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-framework-2-announcement">2.0 Announcement</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/release-notes">Release Notes</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/credits">Credits</a></li>
                 </ul>
@@ -134,6 +134,8 @@
 <li><a href="#api-policy-implementation-methods">API policy implementation methods</a></li>
 <li><a href="#dispatch-methods">Dispatch methods</a></li>
 <li class="main"><a href="#function-based-views">Function Based Views</a></li>
+<li><a href="#@api_view()">@api_view()</a></li>
+<li><a href="#api-policy-decorators">API policy decorators</a></li>
 
               </ul>
             </div>
@@ -218,8 +220,40 @@ This method is used to enforce permissions and throttling, and perform content n
 <p>Saying [that Class based views] is always the superior solution is a mistake.</p>
 <p>&mdash; <a href="http://www.boredomandlaziness.org/2012/05/djangos-cbvs-are-not-mistake-but.html">Nick Coghlan</a></p>
 </blockquote>
-<p>REST framework also gives you to work with regular function based views...</p>
-<p><strong>[TODO]</strong></p>
+<p>REST framework also allows you to work with regular function based views. It provides a set of simple decorators that wrap your function based views to ensure they receive an instance of <code>Request</code> (rather than the usual Django <code>HttpRequest</code>) and allows them to return a <code>Response</code> (instead of a Django <code>HttpResponse</code>), and allow you to configure how the request is processed.</p>
+<h2 id="api_view">@api_view()</h2>
+<p><strong>Signature:</strong> `@api_view(http_method_names)</p>
+<p>The core of this functionality is the <code>api_view</code> decorator, which takes a list of HTTP methods that your view should respond to. For example, this is how you would write a very simple view that just manually returns some data:</p>
+<pre class="prettyprint lang-py"><code>from rest_framework.decorators import api_view
+
+@api_view(['GET'])
+def hello_world(request):
+    return Response({"message": "Hello, world!"})
+</code></pre>
+<p>This view will use the default renderers, parsers, authentication classes etc specified in the <a href="settings">settings</a>.</p>
+<h2 id="api-policy-decorators">API policy decorators</h2>
+<p>To override the default settings, REST framework provides a set of additional decorators which can be added to your views. These must come <em>after</em> (below) the <code>@api_view</code> decorator. For example, to create a view that uses a <a href="throttling">throttle</a> to ensure it can only be called once per day by a particular user, use the <code>@throttle_classes</code> decorator, passing a list of throttle classes:</p>
+<pre class="prettyprint lang-py"><code>from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.throttling import UserRateThrottle
+
+class OncePerDayUserThrottle(UserRateThrottle):
+        rate = '1/day'
+
+@api_view(['GET'])
+@throttle_classes([OncePerDayUserThrottle])
+def view(request):
+    return Response({"message": "Hello for today! See you tomorrow!"})
+</code></pre>
+<p>These decorators correspond to the attributes set on <code>APIView</code> subclasses, described above.</p>
+<p>The available decorators are:</p>
+<ul>
+<li><code>@renderer_classes(...)</code></li>
+<li><code>@parser_classes(...)</code></li>
+<li><code>@authentication_classes(...)</code></li>
+<li><code>@throttle_classes(...)</code></li>
+<li><code>@permission_classes(...)</code></li>
+</ul>
+<p>Each of these decorators takes a single argument which must be a list or tuple of classes.</p>
           </div><!--/span-->
         </div><!--/row-->
       </div><!--/.fluid-container-->

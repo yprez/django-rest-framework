@@ -93,7 +93,7 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/browsable-api">The Browsable API</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-hypermedia-hateoas">REST, Hypermedia & HATEOAS</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/contributing">Contributing to REST framework</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/migration">2.0 Migration Guide</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-framework-2-announcement">2.0 Announcement</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/release-notes">Release Notes</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/credits">Credits</a></li>
                 </ul>
@@ -179,7 +179,7 @@
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
 
-    def get_paginate_by(self):
+    def get_paginate_by(self, queryset):
         """
         Use smaller pagination for HTML representations.
         """

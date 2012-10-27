@@ -33,7 +33,7 @@
 
     </script>
   </head>
-  <body onload="prettyPrint()" class="throttling-page">
+  <body onload="prettyPrint()" class="rest-framework-2-announcement-page">
 
   <div class="wrapper">
 
@@ -128,138 +128,68 @@
           -->
             <div id="table-of-contents">
               <ul class="nav nav-list side-nav well sidebar-nav-fixed">
-                <li class="main"><a href="#throttling">Throttling</a></li>
-<li><a href="#how-throttling-is-determined">How throttling is determined</a></li>
-<li><a href="#setting-the-throttling-policy">Setting the throttling policy</a></li>
-<li class="main"><a href="#api-reference">API Reference</a></li>
-<li><a href="#anonratethrottle">AnonRateThrottle</a></li>
-<li><a href="#userratethrottle">UserRateThrottle</a></li>
-<li><a href="#scopedratethrottle">ScopedRateThrottle</a></li>
-<li class="main"><a href="#custom-throttles">Custom throttles</a></li>
+                <li class="main"><a href="#django-rest-framework-2">Django REST framework 2</a></li>
+<li><a href="#user-feedback">User feedback</a></li>
+<li><a href="#serialization">Serialization</a></li>
+<li><a href="#generic-views">Generic views</a></li>
+<li><a href="#requests,-responses-&-views">Requests, Responses & Views</a></li>
+<li><a href="#api-design">API Design</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#the-browseable-api">The Browseable API</a></li>
+<li><a href="#summary">Summary</a></li>
 
               </ul>
             </div>
           </div>
 
           <div id="main-content" class="span9">
-            <p><a class="github" href="https://github.com/tomchristie/django-rest-framework/blob/restframework2/rest_framework/throttling.py"><span class="label label-info">throttling.py</span></a></p>
-<h1 id="throttling">Throttling</h1>
+            <h1 id="django-rest-framework-2">Django REST framework 2</h1>
+<p>What it is, and why you should care</p>
 <blockquote>
-<p>HTTP/1.1 420 Enhance Your Calm</p>
-<p><a href="https://dev.twitter.com/docs/error-codes-responses">Twitter API rate limiting response</a></p>
+<p>Most people just make the mistake that it should be simple to design simple things. In reality, the effort required to design something is inversely proportional to the simplicity of the result.</p>
+<p>&mdash; <a href="http://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven#comment-724">Roy Fielding</a></p>
 </blockquote>
-<p>Throttling is similar to <a href="permissions">permissions</a>, in that it determines if a request should be authorized.  Throttles indicate a temporary state, and are used to control the rate of requests that clients can make to an API.</p>
-<p>As with permissions, multiple throttles may be used.  Your API might have a restrictive throttle for unauthenticated requests, and a less restrictive throttle for authenticated requests.</p>
-<p>Another scenario where you might want to use multiple throttles would be if you need to impose different constraints on different parts of the API, due to some services being particularly resource-intensive.</p>
-<p>Multiple throttles can also be used if you want to impose both burst throttling  rates, and sustained throttling rates.  For example, you might want to limit a user to a maximum of 60 requests per minute, and 1000 requests per day.</p>
-<p>Throttles do not necessarily only refer to rate-limiting requests.  For example a storage service might also need to throttle against bandwidth, and a paid data service might want to throttle against a certain number of a records being accessed.</p>
-<h2 id="how-throttling-is-determined">How throttling is determined</h2>
-<p>As with permissions and authentication, throttling in REST framework is always defined as a list of classes.</p>
-<p>Before running the main body of the view each throttle in the list is checked.
-If any throttle check fails an <code>exceptions.Throttled</code> exception will be raised, and the main body of the view will not run.</p>
-<h2 id="setting-the-throttling-policy">Setting the throttling policy</h2>
-<p>The default throttling policy may be set globally, using the <code>DEFAULT_THROTTLE_CLASSES</code> and <code>DEFAULT_THROTTLE_RATES</code> settings.  For example.</p>
-<pre class="prettyprint lang-py"><code>REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': (
-        'rest_framework.throttles.AnonThrottle',
-        'rest_framework.throttles.UserThrottle',
-    )
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day'
-    }        
-}
-</code></pre>
-<p>The rate descriptions used in <code>DEFAULT_THROTTLE_RATES</code> may include <code>second</code>, <code>minute</code>, <code>hour</code> or <code>day</code> as the throttle period.</p>
-<p>You can also set the throttling policy on a per-view basis, using the <code>APIView</code> class based views.</p>
-<pre class="prettyprint lang-py"><code>class ExampleView(APIView):
-    throttle_classes = (UserThrottle,)
-
-    def get(self, request, format=None):
-        content = {
-            'status': 'request was permitted'
-        }
-        return Response(content)
-</code></pre>
-<p>Or, if you're using the <code>@api_view</code> decorator with function based views.</p>
-<pre class="prettyprint lang-py"><code>@api_view('GET')
-@throttle_classes(UserThrottle)
-def example_view(request, format=None):
-    content = {
-        'status': 'request was permitted'
-    }
-    return Response(content)
-</code></pre>
-<hr />
-<h1 id="api-reference">API Reference</h1>
-<h2 id="anonratethrottle">AnonRateThrottle</h2>
-<p>The <code>AnonThrottle</code> will only ever throttle unauthenticated users.  The IP address of the incoming request is used to generate a unique key to throttle against.</p>
-<p>The allowed request rate is determined from one of the following (in order of preference).</p>
+<p>REST framework 2 is an almost complete reworking of the original framework, which comprehensivly addresses some of the original design issues.</p>
+<p>Because the latest version should be considered a re-release, rather than an incremental improvement, we've skipped a version, and called this release Django REST framework 2.0.</p>
+<p>This article is intended to give you a flavor of what REST framework 2 is, and why you might want to give it a try.</p>
+<h2 id="user-feedback">User feedback</h2>
+<p>Before we get cracking, let's start with the hard sell, with a few bits of feedback from some early adopters…</p>
+<p>"Django REST framework 2 is beautiful. Some of the API design is worthy of @kennethreitz." - <a href="https://twitter.com/kobutsu/status/261689665952833536">Kit La Touche</a></p>
+<p>"Since it's pretty much just Django, controlling things like URLs has been a breeze... I think [REST framework 2] has definitely got the right approach here; even simple things like being able to override a function called post to do custom work during rather than having to intimately know what happens during a post make a huge difference to your productivity." - <a href="https://groups.google.com/d/msg/django-rest-framework/heRGHzG6BWQ/ooVURgpwVC0J">Ian Strachan</a></p>
+<p>"I switched to the 2.0 branch and I don't regret it - fully refactored my code in another &half; day and it's <em>much</em> more to my tastes" - <a href="https://groups.google.com/d/msg/django-rest-framework/flsXbvYqRoY/9lSyntOf5cUJ">Bruno Desthuilliers</a></p>
+<p>Sounds good, right?  Let's get into some details...</p>
+<h2 id="serialization">Serialization</h2>
+<p>REST framework 2 includes a totally re-worked serialization engine, that was initially intended as a replacement for Django's existing inflexible fixture serialization, and which meets the following design goals:</p>
 <ul>
-<li>The <code>rate</code> property on the class, which may be provided by overriding <code>AnonThrottle</code> and setting the property.</li>
-<li>The <code>DEFAULT_THROTTLE_RATES['anon']</code> setting.</li>
+<li>A declarative serialization API, that mirrors Django's <code>Forms</code>/<code>ModelForms</code> API.</li>
+<li>Structural concerns are decoupled from encoding concerns.</li>
+<li>Able to support rendering and parsing to many formats, including both machine-readable representations and HTML forms.</li>
+<li>Validation that can be mapped to obvious and comprehensive error responses. </li>
+<li>Serializers that support both nested, flat, and partially-nested representations.</li>
+<li>Relationships that can be expressed as primary keys, hyperlinks, slug fields, and other custom representations.</li>
 </ul>
-<p><code>AnonThrottle</code> is suitable if you want to restrict the rate of requests from unknown sources.</p>
-<h2 id="userratethrottle">UserRateThrottle</h2>
-<p>The <code>UserThrottle</code> will throttle users to a given rate of requests across the API.  The user id is used to generate a unique key to throttle against.  Unauthenticated requests will fall back to using the IP address of the incoming request to generate a unique key to throttle against.</p>
-<p>The allowed request rate is determined from one of the following (in order of preference).</p>
-<ul>
-<li>The <code>rate</code> property on the class, which may be provided by overriding <code>UserThrottle</code> and setting the property.</li>
-<li>The <code>DEFAULT_THROTTLE_RATES['user']</code> setting.</li>
-</ul>
-<p>An API may have multiple <code>UserRateThrottles</code> in place at the same time.  To do so, override <code>UserRateThrottle</code> and set a unique "scope" for each class.</p>
-<p>For example, multiple user throttle rates could be implemented by using the following classes...</p>
-<pre class="prettyprint lang-py"><code>class BurstRateThrottle(UserRateThrottle):
-    scope = 'burst'
-
-class SustainedRateThrottle(UserRateThrottle):
-    scope = 'sustained'
-</code></pre>
-<p>...and the following settings.</p>
-<pre class="prettyprint lang-py"><code>REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': (
-        'example.throttles.BurstRateThrottle',
-        'example.throttles.SustainedRateThrottle',
-    )
-    'DEFAULT_THROTTLE_RATES': {
-        'burst': '60/min',
-        'sustained': '1000/day'
-    }
-}
-</code></pre>
-<p><code>UserThrottle</code> is suitable if you want simple global rate restrictions per-user.</p>
-<h2 id="scopedratethrottle">ScopedRateThrottle</h2>
-<p>The <code>ScopedThrottle</code> class can be used to restrict access to specific parts of the API.  This throttle will only be applied if the view that is being accessed includes a <code>.throttle_scope</code> property.  The unique throttle key will then be formed by concatenating the "scope" of the request with the unique user id or IP address.</p>
-<p>The allowed request rate is determined by the <code>DEFAULT_THROTTLE_RATES</code> setting using a key from the request "scope".</p>
-<p>For example, given the following views...</p>
-<pre class="prettyprint lang-py"><code>class ContactListView(APIView):
-    throttle_scope = 'contacts'
-    ...
-
-class ContactDetailView(ApiView):
-    throttle_scope = 'contacts'
-    ...
-
-class UploadView(APIView):        
-    throttle_scope = 'uploads'
-    ...
-</code></pre>
-<p>...and the following settings.</p>
-<pre class="prettyprint lang-py"><code>REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': (
-        'rest_framework.throttles.ScopedRateThrottle',
-    )
-    'DEFAULT_THROTTLE_RATES': {
-        'contacts': '1000/day',
-        'uploads': '20/day'
-    }
-}
-</code></pre>
-<p>User requests to either <code>ContactListView</code> or <code>ContactDetailView</code> would be restricted to a total of 1000 requests per-day.  User requests to <code>UploadView</code> would be restricted to 20 requests per day.</p>
-<hr />
-<h1 id="custom-throttles">Custom throttles</h1>
-<p>To create a custom throttle, override <code>BaseThrottle</code> and implement <code>.allow_request(request, view)</code>.  The method should return <code>True</code> if the request should be allowed, and <code>False</code> otherwise.</p>
-<p>Optionally you may also override the <code>.wait()</code> method.  If implemented, <code>.wait()</code> should return a recommended number of seconds to wait before attempting the next request, or <code>None</code>.  The <code>.wait()</code> method will only be called if <code>.allow_request()</code> has previously returned <code>False</code>.</p>
+<p>Mapping between the internal state of the system and external representations of that state is the core concern of building Web APIs.  Designing serializers that allow the developer to do so in a flexible and obvious way is a deceptively difficult design task, and with the new serialization API we think we've pretty much nailed it.</p>
+<h2 id="generic-views">Generic views</h2>
+<p>When REST framework was initially released at the start of 2011, the current Django release was version 1.2.  REST framework included a backport of Django 1.3's upcoming <code>View</code> class, but it didn't take full advantage of the generic view implementations.</p>
+<p>With the new release the generic views in REST framework now tie in with Django's generic views.  The end result is that framework is clean, lightweight and easy to use.</p>
+<h2 id="requests-responses-views">Requests, Responses &amp; Views</h2>
+<p>REST framework 2 includes <code>Request</code> and <code>Response</code> classes, than are used in place of Django's existing <code>HttpRequest</code> and <code>HttpResponse</code> classes.  Doing so allows logic such as parsing the incoming request or rendering the outgoing response to be supported transparently by the framework.</p>
+<p>The <code>Request</code>/<code>Response</code> approach leads to a much cleaner API, less logic in the view itself, and a simple, obvious request-response cycle.</p>
+<p>REST framework 2 also allows you to work with both function-based and class-based views.  For simple API views all you need is a single <code>@api_view</code> decorator, and you're good to go.</p>
+<h2 id="api-design">API Design</h2>
+<p>Pretty much every aspect of REST framework has been reworked, with the aim of ironing out some of the design flaws of the previous versions.  Each of the components of REST framework are cleanly decoupled, and can be used independantly of each-other, and there are no monolithic resource classes, overcomplicated mixin combinations, or opinionated serialization or URL routing decisions.</p>
+<h2 id="documentation">Documentation</h2>
+<p>As you can see the documentation for REST framework has been radically improved.  It gets a completely new style, using markdown for the documentation source, and a bootstrap-based theme for the styling.</p>
+<p>In the author's opinion, using <code>markdown</code> for documentation is a much better option that <code>rst</code>.  It is intuitive and readable, and there is great tooling available, such as the <a href="http://mouapp.com/">Mou</a> editor for Mac OS X, which makes it easy and plesant to work.</p>
+<p>We're really pleased with how the docs style looks - it's simple and clean, and the docs build much more quickly than with the previous sphinx setup.  We'll miss being able to use the wonderful <a href="https://readthedocs.org/">Read the Docs</a> service, but we think it's a trade-off worth making.</p>
+<p>Developing REST framework's documentation builder into a fully-fledged reusable project is something that we have planned for a future date.</p>
+<h2 id="the-browseable-api">The Browseable API</h2>
+<p>Django REST framework's most unique feature is the way it is able to serve up both machine-readable representations, and a fully browsable HTML representation to the same endpoints.</p>
+<p>Browseable Web APIs are easier to work with, visualize and debug, and generally makes it easier and more frictionless to inspect and work with.</p>
+<p>With REST framework 2, the browseable API gets a snazzy new bootstrap-based theme that looks great and is even nicer to work with.</p>
+<p>There are also some functionality improvments - actions such as as <code>POST</code> and <code>DELETE</code> will only display if the user has the appropriate permissions.</p>
+<h2 id="summary">Summary</h2>
+<p>In short, we've engineered the hell outta this thing, and we're incredibly proud of the result.</p>
           </div><!--/span-->
         </div><!--/row-->
       </div><!--/.fluid-container-->
