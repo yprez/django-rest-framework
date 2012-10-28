@@ -87,11 +87,9 @@
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Topics <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/csrf">Working with AJAX and CSRF</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/browser-enhancements">Browser enhancements</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/browsable-api">The Browsable API</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-hypermedia-hateoas">REST, Hypermedia & HATEOAS</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/topics/contributing">Contributing to REST framework</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/rest-framework-2-announcement">2.0 Announcement</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/release-notes">Release Notes</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/topics/credits">Credits</a></li>
@@ -143,7 +141,13 @@
 
           <div id="main-content" class="span9">
             <h1 id="tutorial-4-authentication-permissions">Tutorial 4: Authentication &amp; Permissions</h1>
-<p>Currently our API doesn't have any restrictions on who can </p>
+<p>Currently our API doesn't have any restrictions on who can edit or delete code snippets.  We'd like to have some more advanced behavior in order to make sure that:</p>
+<ul>
+<li>Code snippets are always associated with a creator.</li>
+<li>Only authenticated users may create snippets.</li>
+<li>Only the creator of a snippet may update or delete it.</li>
+<li>Unauthenticated requests should have full read-only access.</li>
+</ul>
 <h2 id="adding-information-to-our-model">Adding information to our model</h2>
 <p>We're going to make a couple of changes to our <code>Snippet</code> model class.
 First, let's add a couple of fields.  One of those fields will be used to represent the user who created the code snippet.  The other field will be used to store the highlighted HTML representation of the code.</p>
