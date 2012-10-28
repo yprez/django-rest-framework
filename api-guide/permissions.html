@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -133,6 +132,7 @@
 <li><a href="#object-level-permissions">Object level permissions</a></li>
 <li><a href="#setting-the-permission-policy">Setting the permission policy</a></li>
 <li class="main"><a href="#api-reference">API Reference</a></li>
+<li><a href="#allowany">AllowAny</a></li>
 <li><a href="#isauthenticated">IsAuthenticated</a></li>
 <li><a href="#isadminuser">IsAdminUser</a></li>
 <li><a href="#isauthenticatedorreadonly">IsAuthenticatedOrReadOnly</a></li>
@@ -168,6 +168,11 @@ If any permission check fails an <code>exceptions.PermissionDenied</code> except
     )
 }
 </code></pre>
+<p>If not specified, this setting defaults to allowing unrestricted access:</p>
+<pre class="prettyprint lang-py"><code>'DEFAULT_PERMISSION_CLASSES': (
+   'rest_framework.permissions.AllowAny',
+)
+</code></pre>
 <p>You can also set the authentication policy on a per-view basis, using the <code>APIView</code> class based views.</p>
 <pre class="prettyprint lang-py"><code>class ExampleView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -189,6 +194,9 @@ def example_view(request, format=None):
 </code></pre>
 <hr />
 <h1 id="api-reference">API Reference</h1>
+<h2 id="allowany">AllowAny</h2>
+<p>The <code>AllowAny</code> permission class will allow unrestricted access, <strong>regardless of if the request was authenticated or unauthenticated</strong>.</p>
+<p>This permission is not strictly required, since you can achieve the same result by using an empty list or tuple for the permissions setting, but you may find it useful to specify this class because it makes the intention explicit.</p>
 <h2 id="isauthenticated">IsAuthenticated</h2>
 <p>The <code>IsAuthenticated</code> permission class will deny permission to any unauthenticated user, and allow permission otherwise.</p>
 <p>This permission is suitable if you want your API to only be accessible to registered users.</p>

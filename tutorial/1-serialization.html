@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -135,7 +134,8 @@
 <li><a href="#creating-a-model-to-work-with">Creating a model to work with</a></li>
 <li><a href="#creating-a-serializer-class">Creating a Serializer class</a></li>
 <li><a href="#working-with-serializers">Working with Serializers</a></li>
-<li><a href="#writing-regular-django-views-using-our-serializers">Writing regular Django views using our Serializers</a></li>
+<li><a href="#using-modelserializers">Using ModelSerializers</a></li>
+<li><a href="#writing-regular-django-views-using-our-serializer">Writing regular Django views using our Serializer</a></li>
 <li><a href="#testing-our-first-attempt-at-a-web-api">Testing our first attempt at a Web API</a></li>
 <li><a href="#where-are-we-now">Where are we now</a></li>
 
@@ -146,7 +146,8 @@
           <div id="main-content" class="span9">
             <h1 id="tutorial-1-serialization">Tutorial 1: Serialization</h1>
 <h2 id="introduction">Introduction</h2>
-<p>This tutorial will walk you through the building blocks that make up REST framework.   It'll take a little while to get through, but it'll give you a comprehensive understanding of how everything fits together.</p>
+<p>This tutorial will cover creating a simple pastebin code highlighting Web API. Along the way it will introduce the various components that make up REST framework, and give you a comprehensive understanding of how everything fits together.</p>
+<p>The tutorial is fairly in-depth, so you should probably get a cookie and a cup of your favorite brew before getting started.  If you just want a quick overview, you should head over to the <a href="quickstart">quickstart</a> documentation instead.</p>
 <h2 id="setting-up-a-new-environment">Setting up a new environment</h2>
 <p>Before we do anything else we'll create a new virtual environment, using <a href="http://www.virtualenv.org/en/latest/index.html">virtualenv</a>.  This will make sure our package configuration is keep nicely isolated from any other projects we're working on.</p>
 <pre class="prettyprint lang-bsh">
@@ -157,6 +158,7 @@ source ~/env/tutorial/bin/activate
 <p>Now that we're inside a virtualenv environment, we can install our package requirements.</p>
 <pre class="prettyprint lang-py"><code>pip install django
 pip install djangorestframework
+pip install pygments  # We'll be using this for the code highlighting
 </code></pre>
 <p><strong>Note:</strong> To exit the virtualenv environment at any time, just type <code>deactivate</code>.  For more information see the <a href="http://www.virtualenv.org/en/latest/index.html">virtualenv documentation</a>.</p>
 <h2 id="getting-started">Getting started</h2>
@@ -166,8 +168,9 @@ To get started, let's create a new project to work with.</p>
 django-admin.py startproject tutorial
 cd tutorial
 </code></pre>
-<p>Once that's done we can create an app that we'll use to create a simple Web API.</p>
-<pre class="prettyprint lang-py"><code>python manage.py startapp blog
+<p>Once that's done we can create an app that we'll use to create a simple Web API.
+We're going to create a project that </p>
+<pre class="prettyprint lang-py"><code>python manage.py startapp snippets
 </code></pre>
 <p>The simplest way to get up and running will probably be to use an <code>sqlite3</code> database for the tutorial.  Edit the <code>tutorial/settings.py</code> file, and set the default database <code>"ENGINE"</code> to <code>"sqlite3"</code>, and <code>"NAME"</code> to <code>"tmp.db"</code>.</p>
 <pre class="prettyprint lang-py"><code>DATABASES = {
@@ -181,52 +184,79 @@ cd tutorial
     }
 }
 </code></pre>
-<p>We'll also need to add our new <code>blog</code> app and the <code>rest_framework</code> app to <code>INSTALLED_APPS</code>.</p>
+<p>We'll also need to add our new <code>snippets</code> app and the <code>rest_framework</code> app to <code>INSTALLED_APPS</code>.</p>
 <pre class="prettyprint lang-py"><code>INSTALLED_APPS = (
     ...
     'rest_framework',
-    'blog'
+    'snippets'
 )
 </code></pre>
-<p>We also need to wire up the root urlconf, in the <code>tutorial/urls.py</code> file, to include our blog views.</p>
+<p>We also need to wire up the root urlconf, in the <code>tutorial/urls.py</code> file, to include our snippet views.</p>
 <pre class="prettyprint lang-py"><code>urlpatterns = patterns('',
-    url(r'^', include('blog.urls')),
+    url(r'^', include('snippets.urls')),
 )
 </code></pre>
 <p>Okay, we're ready to roll.</p>
 <h2 id="creating-a-model-to-work-with">Creating a model to work with</h2>
-<p>For the purposes of this tutorial we're going to start by creating a simple <code>Comment</code> model that is used to store comments against a blog post.  Go ahead and edit the  <code>blog</code> app's <code>models.py</code> file.</p>
+<p>For the purposes of this tutorial we're going to start by creating a simple <code>Snippet</code> model that is used to store code snippets.  Go ahead and edit the  <code>snippets</code> app's <code>models.py</code> file.</p>
 <pre class="prettyprint lang-py"><code>from django.db import models
+from pygments.lexers import get_all_lexers
+from pygments.styles import get_all_styles
 
-class Comment(models.Model):        
-    email = models.EmailField()
-    content = models.CharField(max_length=200)
+LANGUAGE_CHOICES = sorted([(item[1][0], item[0]) for item in get_all_lexers()])
+STYLE_CHOICES = sorted((item, item) for item in list(get_all_styles()))
+
+class Snippet(models.Model):
     created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=100, default='')
+    code = models.TextField()
+    linenos = models.BooleanField(default=False)
+    language = models.CharField(choices=LANGUAGE_CHOICES,
+                                default='python',
+                                max_length=100)
+    style = models.CharField(choices=STYLE_CHOICES,
+                                default='friendly',
+                                max_length=100)
+
+    class Meta:
+        ordering = ('created',)
 </code></pre>
 <p>Don't forget to sync the database for the first time.</p>
 <pre class="prettyprint lang-py"><code>python manage.py syncdb
 </code></pre>
 <h2 id="creating-a-serializer-class">Creating a Serializer class</h2>
-<p>We're going to create a simple Web API that we can use to edit these comment objects with.  The first thing we need is a way of serializing and deserializing the objects into representations such as <code>json</code>.  We do this by declaring serializers that work very similarly to Django's forms.  Create a file in the <code>blog</code> directory named <code>serializers.py</code> and add the following.</p>
-<pre class="prettyprint lang-py"><code>from blog import models
+<p>The first thing we need to get started on our Web API is provide a way of serializing and deserializing the snippet instances into representations such as <code>json</code>.  We can do this by declaring serializers that work very similarly to Django's forms.  Create a file in the <code>snippets</code> directory named <code>serializers.py</code> and add the following.</p>
+<pre class="prettyprint lang-py"><code>from django.forms import widgets
 from rest_framework import serializers
+from snippets import models
 
-class CommentSerializer(serializers.Serializer):
-    id = serializers.IntegerField(readonly=True)
-    email = serializers.EmailField()
-    content = serializers.CharField(max_length=200)
-    created = serializers.DateTimeField(readonly=True)
+class SnippetSerializer(serializers.Serializer):
+    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+    title = serializers.CharField(required=False,
+                                  max_length=100)
+    code = serializers.CharField(widget=widgets.Textarea,
+                                 max_length=100000)
+    linenos = serializers.BooleanField(required=False)
+    language = serializers.ChoiceField(choices=models.LANGUAGE_CHOICES,
+                                       default='python')
+    style = serializers.ChoiceField(choices=models.STYLE_CHOICES,
+                                    default='friendly')
 
     def restore_object(self, attrs, instance=None):
         """
-        Create or update a new comment instance.
+        Create or update a new snippet instance.
         """
         if instance:
-            instance.email = attrs['email']
-            instance.content = attrs['content']
-            instance.created = attrs['created']
+            # Update existing instance
+            instance.title = attrs['title']
+            instance.code = attrs['code']
+            instance.linenos = attrs['linenos']
+            instance.language = attrs['language']
+            instance.style = attrs['style']
             return instance
-        return models.Comment(**attrs)
+
+        # Create new instance
+        return models.Snippet(**attrs)
 </code></pre>
 <p>The first part of serializer class defines the fields that get serialized/deserialized.  The <code>restore_object</code> method defines how fully fledged instances get created when deserializing data.</p>
 <p>We can actually also save ourselves some time by using the <code>ModelSerializer</code> class, as we'll see later, but for now we'll keep our serializer definition explicit.<br />
@@ -235,28 +265,24 @@ class CommentSerializer(serializers.Serializer):
 <p>Before we go any further we'll familiarise ourselves with using our new Serializer class.  Let's drop into the Django shell.</p>
 <pre class="prettyprint lang-py"><code>python manage.py shell
 </code></pre>
-<p>Okay, once we've got a few imports out of the way, we'd better create a few comments to work with.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
+<p>Okay, once we've got a few imports out of the way, let's create a code snippet to work with.</p>
+<pre class="prettyprint lang-py"><code>from snippets.models import Snippet
+from snippets.serializers import SnippetSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 
-c1 = Comment(email='leila@example.com', content='nothing to say')
-c2 = Comment(email='tom@example.com', content='foo bar')
-c3 = Comment(email='anna@example.com', content='LOLZ!')
-c1.save()
-c2.save()
-c3.save()
+snippet = Snippet(code='print "hello, world"\n')
+snippet.save()
 </code></pre>
-<p>We've now got a few comment instances to play with.  Let's take a look at serializing one of those instances.</p>
-<pre class="prettyprint lang-py"><code>serializer = CommentSerializer(instance=c1)
+<p>We've now got a few snippet instances to play with.  Let's take a look at serializing one of those instances.</p>
+<pre class="prettyprint lang-py"><code>serializer = SnippetSerializer(instance=snippet)
 serializer.data
-# {'id': 1, 'email': u'leila@example.com', 'content': u'nothing to say', 'created': datetime.datetime(2012, 8, 22, 16, 20, 9, 822774, tzinfo=&lt;UTC&gt;)}
+# {'pk': 1, 'title': u'', 'code': u'print "hello, world"\n', 'linenos': False, 'language': u'python', 'style': u'friendly'}
 </code></pre>
 <p>At this point we've translated the model instance into python native datatypes.  To finalise the serialization process we render the data into <code>json</code>.</p>
 <pre class="prettyprint lang-py"><code>content = JSONRenderer().render(serializer.data)
 content
-# '{"id": 1, "email": "leila@example.com", "content": "nothing to say", "created": "2012-08-22T16:20:09.822"}'
+# '{"pk": 1, "title": "", "code": "print \\"hello, world\\"\\n", "linenos": false, "language": "python", "style": "friendly"}'
 </code></pre>
 <p>Deserialization is similar.  First we parse a stream into python native datatypes... </p>
 <pre class="prettyprint lang-py"><code>import StringIO
@@ -265,23 +291,34 @@ stream = StringIO.StringIO(content)
 data = JSONParser().parse(stream)
 </code></pre>
 <p>...then we restore those native datatypes into to a fully populated object instance.</p>
-<pre class="prettyprint lang-py"><code>serializer = CommentSerializer(data)
+<pre class="prettyprint lang-py"><code>serializer = SnippetSerializer(data)
 serializer.is_valid()
 # True
 serializer.object
-# &lt;Comment: Comment object&gt;
+# &lt;Snippet: Snippet object&gt;
 </code></pre>
 <p>Notice how similar the API is to working with forms.  The similarity should become even more apparent when we start writing views that use our serializer.</p>
-<h2 id="writing-regular-django-views-using-our-serializers">Writing regular Django views using our Serializers</h2>
+<h2 id="using-modelserializers">Using ModelSerializers</h2>
+<p>Our <code>SnippetSerializer</code> class is replicating a lot of information that's also contained in the <code>Snippet</code> model.  It would be nice if we could keep out code a bit  more concise.</p>
+<p>In the same way that Django provides both <code>Form</code> classes and <code>ModelForm</code> classes, REST framework includes both <code>Serializer</code> classes, and <code>ModelSerializer</code> classes.</p>
+<p>Let's look at refactoring our serializer using the <code>ModelSerializer</code> class.
+Open the file <code>snippets/serializers.py</code> again, and edit the <code>SnippetSerializer</code> class.</p>
+<pre class="prettyprint lang-py"><code>class SnippetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Snippet
+        fields = ('pk', 'title', 'code', 'linenos', 'language', 'style')
+</code></pre>
+<h2 id="writing-regular-django-views-using-our-serializer">Writing regular Django views using our Serializer</h2>
 <p>Let's see how we can write some API views using our new Serializer class.
-We'll start off by creating a subclass of HttpResponse that we can use to render any data we return into <code>json</code>.</p>
-<p>Edit the <code>blog/views.py</code> file, and add the following.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
-from django.http import HttpResponse
+For the moment we won't use any of REST framework's other features, we'll just write the views as regular Django views.</p>
+<p>We'll start off by creating a subclass of HttpResponse that we can use to render any data we return into <code>json</code>.</p>
+<p>Edit the <code>snippet/views.py</code> file, and add the following.</p>
+<pre class="prettyprint lang-py"><code>from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+from snippets.models import Snippet
+from snippets.serializers import SnippetSerializer
 
 class JSONResponse(HttpResponse):
     """
@@ -293,63 +330,61 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 </code></pre>
-<p>The root of our API is going to be a view that supports listing all the existing comments, or creating a new comment.</p>
+<p>The root of our API is going to be a view that supports listing all the existing snippets, or creating a new snippet.</p>
 <pre class="prettyprint lang-py"><code>@csrf_exempt
-def comment_root(request):
+def snippet_list(request):
     """
-    List all comments, or create a new comment.
+    List all code snippets, or create a new snippet.
     """
     if request.method == 'GET':
-        comments = Comment.objects.all()
-        serializer = CommentSerializer(instance=comments)
+        snippets = Snippet.objects.all()
+        serializer = SnippetSerializer(instance=snippets)
         return JSONResponse(serializer.data)
 
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = CommentSerializer(data)
+        serializer = SnippetSerializer(data)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return JSONResponse(serializer.data, status=201)
         else:
             return JSONResponse(serializer.errors, status=400)
 </code></pre>
 <p>Note that because we want to be able to POST to this view from clients that won't have a CSRF token we need to mark the view as <code>csrf_exempt</code>.  This isn't something that you'd normally want to do, and REST framework views actually use more sensible behavior than this, but it'll do for our purposes right now. </p>
-<p>We'll also need a view which corresponds to an individual comment, and can be used to retrieve, update or delete the comment.</p>
+<p>We'll also need a view which corresponds to an individual snippet, and can be used to retrieve, update or delete the snippet.</p>
 <pre class="prettyprint lang-py"><code>@csrf_exempt
-def comment_instance(request, pk):
+def snippet_detail(request, pk):
     """
-    Retrieve, update or delete a comment instance.
+    Retrieve, update or delete a code snippet.
     """
     try:
-        comment = Comment.objects.get(pk=pk)
-    except Comment.DoesNotExist:
+        snippet = Snippet.objects.get(pk=pk)
+    except Snippet.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = CommentSerializer(instance=comment)
+        serializer = SnippetSerializer(instance=snippet)
         return JSONResponse(serializer.data)
 
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = CommentSerializer(data, instance=comment)
+        serializer = SnippetSerializer(data, instance=snippet)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return JSONResponse(serializer.data)
         else:
             return JSONResponse(serializer.errors, status=400)
 
     elif request.method == 'DELETE':
-        comment.delete()
+        snippet.delete()
         return HttpResponse(status=204)
 </code></pre>
-<p>Finally we need to wire these views up. Create the <code>blog/urls.py</code> file:</p>
+<p>Finally we need to wire these views up. Create the <code>snippets/urls.py</code> file:</p>
 <pre class="prettyprint lang-py"><code>from django.conf.urls import patterns, url
 
-urlpatterns = patterns('blog.views',
-    url(r'^$', 'comment_root'),
-    url(r'^(?P&lt;pk&gt;[0-9]+)$', 'comment_instance')
+urlpatterns = patterns('snippets.views',
+    url(r'^snippets/$', 'snippet_list'),
+    url(r'^snippets/(?P&lt;pk&gt;[0-9]+)/$', 'snippet_detail')
 )
 </code></pre>
 <p>It's worth noting that there's a couple of edge cases we're not dealing with properly at the moment.  If we send malformed <code>json</code>, or if a request is made with a method that the view doesn't handle, then we'll end up with a 500 "server error" response.  Still, this'll do for now.</p>

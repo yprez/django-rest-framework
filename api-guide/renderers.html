@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -137,7 +136,8 @@
 <li><a href="#jsonprenderer">JSONPRenderer</a></li>
 <li><a href="#yamlrenderer">YAMLRenderer</a></li>
 <li><a href="#xmlrenderer">XMLRenderer</a></li>
-<li><a href="#htmlrenderer">HTMLRenderer</a></li>
+<li><a href="#templatehtmlrenderer">TemplateHTMLRenderer</a></li>
+<li><a href="#statichtmlrenderer">StaticHTMLRenderer</a></li>
 <li><a href="#browsableapirenderer">BrowsableAPIRenderer</a></li>
 <li class="main"><a href="#custom-renderers">Custom renderers</a></li>
 <li><a href="#example">Example</a></li>
@@ -220,32 +220,46 @@ def user_count_view(request, format=None):
 <p>If you are considering using <code>XML</code> for your API, you may want to consider implementing a custom renderer and parser for your specific requirements, and using an existing domain-specific media-type, or creating your own custom XML-based media-type.</p>
 <p><strong>.media_type</strong>: <code>application/xml</code></p>
 <p><strong>.format</strong>: <code>'.xml'</code></p>
-<h2 id="htmlrenderer">HTMLRenderer</h2>
+<h2 id="templatehtmlrenderer">TemplateHTMLRenderer</h2>
 <p>Renders data to HTML, using Django's standard template rendering.
 Unlike other renderers, the data passed to the <code>Response</code> does not need to be serialized.  Also, unlike other renderers, you may want to include a <code>template_name</code> argument when creating the <code>Response</code>.</p>
-<p>The HTMLRenderer will create a <code>RequestContext</code>, using the <code>response.data</code> as the context dict, and determine a template name to use to render the context.</p>
+<p>The TemplateHTMLRenderer will create a <code>RequestContext</code>, using the <code>response.data</code> as the context dict, and determine a template name to use to render the context.</p>
 <p>The template name is determined by (in order of preference):</p>
 <ol>
 <li>An explicit <code>.template_name</code> attribute set on the response.</li>
 <li>An explicit <code>.template_name</code> attribute set on this class.</li>
 <li>The return result of calling <code>view.get_template_names()</code>.</li>
 </ol>
-<p>An example of a view that uses <code>HTMLRenderer</code>:</p>
+<p>An example of a view that uses <code>TemplateHTMLRenderer</code>:</p>
 <pre class="prettyprint lang-py"><code>class UserInstance(generics.RetrieveUserAPIView):
     """
     A view that returns a templated HTML representations of a given user.
     """
     model = Users
-    renderer_classes = (HTMLRenderer,)
+    renderer_classes = (TemplateHTMLRenderer,)
 
     def get(self, request, *args, **kwargs)
         self.object = self.get_object()
         return Response({'user': self.object}, template_name='user_detail.html')
 </code></pre>
-<p>You can use <code>HTMLRenderer</code> either to return regular HTML pages using REST framework, or to return both HTML and API responses from a single endpoint.</p>
-<p>If you're building websites that use <code>HTMLRenderer</code> along with other renderer classes, you should consider listing <code>HTMLRenderer</code> as the first class in the <code>renderer_classes</code> list, so that it will be prioritised first even for browsers that send poorly formed <code>ACCEPT:</code> headers.</p>
+<p>You can use <code>TemplateHTMLRenderer</code> either to return regular HTML pages using REST framework, or to return both HTML and API responses from a single endpoint.</p>
+<p>If you're building websites that use <code>TemplateHTMLRenderer</code> along with other renderer classes, you should consider listing <code>TemplateHTMLRenderer</code> as the first class in the <code>renderer_classes</code> list, so that it will be prioritised first even for browsers that send poorly formed <code>ACCEPT:</code> headers.</p>
 <p><strong>.media_type</strong>: <code>text/html</code></p>
 <p><strong>.format</strong>: <code>'.html'</code></p>
+<p>See also: <code>StaticHTMLRenderer</code></p>
+<h2 id="statichtmlrenderer">StaticHTMLRenderer</h2>
+<p>A simple renderer that simply returns pre-rendered HTML.  Unlike other renderers, the data passed to the response object should be a string representing the content to be returned.</p>
+<p>An example of a view that uses <code>TemplateHTMLRenderer</code>:</p>
+<pre class="prettyprint lang-py"><code>@api_view(('GET',))
+@renderer_classes((StaticHTMLRenderer,))
+def simple_html_view(request): 
+    data = '&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello, world&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;'
+    return Response(data)
+</code></pre>
+<p>You can use <code>TemplateHTMLRenderer</code> either to return regular HTML pages using REST framework, or to return both HTML and API responses from a single endpoint.</p>
+<p><strong>.media_type</strong>: <code>text/html</code></p>
+<p><strong>.format</strong>: <code>'.html'</code></p>
+<p>See also: <code>TemplateHTMLRenderer</code></p>
 <h2 id="browsableapirenderer">BrowsableAPIRenderer</h2>
 <p>Renders data into HTML for the Browseable API.  This renderer will determine which other renderer would have been given highest priority, and use that to display an API style response within the HTML page.</p>
 <p><strong>.media_type</strong>: <code>text/html</code></p>
@@ -289,7 +303,7 @@ class PlainText(renderers.BaseRenderer):
 <p>In some cases you might want your view to use different serialization styles depending on the accepted media type.  If you need to do this you can access <code>request.accepted_renderer</code> to determine the negotiated renderer that will be used for the response.</p>
 <p>For example:</p>
 <pre class="prettyprint lang-py"><code>@api_view(('GET',))
-@renderer_classes((HTMLRenderer, JSONRenderer))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
 def list_users(request):
     """
     A view that can return JSON or HTML representations
@@ -297,9 +311,9 @@ def list_users(request):
     """
     queryset = Users.objects.filter(active=True)
 
-    if request.accepted_media_type == 'text/html':
+    if request.accepted_renderer.format == 'html':
         # TemplateHTMLRenderer takes a context dict,
-        # and additionally requiresa 'template_name'.
+        # and additionally requires a 'template_name'.
         # It does not require serialization.
         data = {'users': queryset}
         return Response(data, template_name='list_users.html')

@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -168,57 +167,55 @@ request.DATA  # Handles arbitrary data.  Works any HTTP request with content.
 <h2 id="pulling-it-all-together">Pulling it all together</h2>
 <p>Okay, let's go ahead and start using these new components to write a few views. </p>
 <p>We don't need our <code>JSONResponse</code> class anymore, so go ahead and delete that.  Once that's done we can start refactoring our views slightly.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
-from rest_framework import status
+<pre class="prettyprint lang-py"><code>from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from snippet.models import Snippet
+from snippet.serializers import SnippetSerializer
 
 @api_view(['GET', 'POST'])
-def comment_root(request):
+def snippet_list(request):
     """
-    List all comments, or create a new comment.
+    List all snippets, or create a new snippet.
     """
     if request.method == 'GET':
-        comments = Comment.objects.all()
-        serializer = CommentSerializer(instance=comments)
+        snippets = Snippet.objects.all()
+        serializer = SnippetSerializer(instance=snippets)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = CommentSerializer(request.DATA)
+        serializer = SnippetSerializer(request.DATA)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 </code></pre>
 <p>Our instance view is an improvement over the previous example.  It's a little more concise, and the code now feels very similar to if we were working with the Forms API.  We're also using named status codes, which makes the response meanings more obvious.</p>
 <pre class="prettyprint lang-py"><code>@api_view(['GET', 'PUT', 'DELETE'])
-def comment_instance(request, pk):
+def snippet_detail(request, pk):
     """
-    Retrieve, update or delete a comment instance.
+    Retrieve, update or delete a snippet instance.
     """              
     try:
-        comment = Comment.objects.get(pk=pk)
-    except Comment.DoesNotExist:
+        snippet = Snippet.objects.get(pk=pk)
+    except Snippet.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = CommentSerializer(instance=comment)
+        serializer = SnippetSerializer(instance=snippet)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = CommentSerializer(request.DATA, instance=comment)
+        serializer = SnippetSerializer(request.DATA, instance=snippet)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        comment.delete()
+        snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 </code></pre>
 <p>This should all feel very familiar - there's not a lot different to working with regular Django views.</p>
@@ -226,18 +223,18 @@ def comment_instance(request, pk):
 <h2 id="adding-optional-format-suffixes-to-our-urls">Adding optional format suffixes to our URLs</h2>
 <p>To take advantage of the fact that our responses are no longer hardwired to a single content type let's add support for format suffixes to our API endpoints. Using format suffixes gives us URLs that explicitly refer to a given format, and means our API will be able to handle URLs such as <a href="http://example.com/api/items/4.json">http://example.com/api/items/4.json</a>.</p>
 <p>Start by adding a <code>format</code> keyword argument to both of the views, like so.</p>
-<pre class="prettyprint lang-py"><code>def comment_root(request, format=None):
+<pre class="prettyprint lang-py"><code>def snippet_list(request, format=None):
 </code></pre>
 <p>and</p>
-<pre class="prettyprint lang-py"><code>def comment_instance(request, pk, format=None):
+<pre class="prettyprint lang-py"><code>def snippet_detail(request, pk, format=None):
 </code></pre>
 <p>Now update the <code>urls.py</code> file slightly, to append a set of <code>format_suffix_patterns</code> in addition to the existing URLs.</p>
 <pre class="prettyprint lang-py"><code>from django.conf.urls import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
 
-urlpatterns = patterns('blog.views',
-    url(r'^$', 'comment_root'),
-    url(r'^(?P&lt;pk&gt;[0-9]+)$', 'comment_instance')
+urlpatterns = patterns('snippet.views',
+    url(r'^snippets/$', 'snippet_list'),
+    url(r'^snippets/(?P&lt;pk&gt;[0-9]+)$', 'snippet_detail')
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
@@ -246,7 +243,7 @@ urlpatterns = format_suffix_patterns(urlpatterns)
 <h2 id="hows-it-looking">How's it looking?</h2>
 <p>Go ahead and test the API from the command line, as we did in <a href="1-serialization">tutorial part 1</a>.  Everything is working pretty similarly, although we've got some nicer error handling if we send invalid requests.</p>
 <p><strong>TODO: Describe using accept headers, content-type headers, and format suffixed URLs</strong></p>
-<p>Now go and open the API in a web browser, by visiting <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>."</p>
+<p>Now go and open the API in a web browser, by visiting <a href="http://127.0.0.1:8000/snippets/">http://127.0.0.1:8000/snippets/</a>."</p>
 <p><strong>Note: Right now the Browseable API only works with the CBV's.  Need to fix that.</strong></p>
 <h3 id="browsability">Browsability</h3>
 <p>Because the API chooses a return format based on what the client asks for, it will, by default, return an HTML-formatted representation of the resource when that resource is requested by a browser. This allows for the API to be easily browsable and usable by humans.</p>

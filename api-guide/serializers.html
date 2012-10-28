@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -140,7 +139,7 @@
 <li><a href="#relational-fields">Relational fields</a></li>
 <li><a href="#specifying-which-fields-should-be-included">Specifying which fields should be included</a></li>
 <li><a href="#specifiying-nested-serialization">Specifiying nested serialization</a></li>
-<li><a href="#customising-the-default-fields-used-by-a-modelserializer">Customising the default fields used by a ModelSerializer</a></li>
+<li><a href="#customising-the-default-fields">Customising the default fields</a></li>
 
               </ul>
             </div>
@@ -233,21 +232,18 @@ class BlogPostSerializer(serializers.Serializer):
 where some of the attributes of an object might not be simple datatypes such as strings, dates or integers.</p>
 <p>The <code>Serializer</code> class is itself a type of <code>Field</code>, and can be used to represent relationships where one object type is nested inside another.</p>
 <pre class="prettyprint lang-py"><code>class UserSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    username = serializers.CharField()
-
-    def restore_object(self, attrs, instance=None):
-        return User(**attrs)
+    email = serializers.Field()
+    username = serializers.Field()
 
 class CommentSerializer(serializers.Serializer):
     user = UserSerializer()
-    title = serializers.CharField()
-    content = serializers.CharField(max_length=200)
-    created = serializers.DateTimeField()
-
-    def restore_object(self, attrs, instance=None):
-        return Comment(**attrs)
+    title = serializers.Field()
+    content = serializers.Field()
+    created = serializers.Field()
 </code></pre>
+<hr />
+<p><strong>Note</strong>: Nested serializers are only suitable for read-only representations, as there are cases where they would have ambiguous or non-obvious behavior if used when updating instances.  For read-write representations you should always use a flat representation, by using one of the <code>RelatedField</code> subclasses.</p>
+<hr />
 <h2 id="creating-custom-fields">Creating custom fields</h2>
 <p>If you want to create a custom field, you'll probably want to override either one or both of the <code>.to_native()</code> and <code>.from_native()</code> methods.  These two methods are used to convert between the intial datatype, and a primative, serializable datatype.  Primative datatypes may be any of a number, string, date/time/datetime or None.  They may also be any list or dictionary like object that only contains other primative objects.</p>
 <p>The <code>.to_native()</code> method is called to convert the initial datatype into a primative, serializable datatype.  The <code>from_native()</code> method is called to restore a primative datatype into it's initial representation.</p>
@@ -302,7 +298,7 @@ The <code>ModelSerializer</code> class lets you automatically create a Serialize
 <h2 id="specifying-fields-explicitly">Specifying fields explicitly</h2>
 <p>You can add extra fields to a <code>ModelSerializer</code> or override the default fields by declaring fields on the class, just as you would for a <code>Serializer</code> class.</p>
 <pre class="prettyprint lang-py"><code>class AccountSerializer(serializers.ModelSerializer):
-    url = CharField(source='get_absolute_url', readonly=True)
+    url = CharField(source='get_absolute_url', read_only=True)
     group = NaturalKeyField()
 
     class Meta:
@@ -325,34 +321,34 @@ The <code>ModelSerializer</code> class lets you automatically create a Serialize
         exclude = ('id',)
 </code></pre>
 <h2 id="specifiying-nested-serialization">Specifiying nested serialization</h2>
-<p>The default <code>ModelSerializer</code> uses primary keys for relationships, but you can also easily generate nested representations using the <code>nested</code> option:</p>
+<p>The default <code>ModelSerializer</code> uses primary keys for relationships, but you can also easily generate nested representations using the <code>depth</code> option:</p>
 <pre class="prettyprint lang-py"><code>class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         exclude = ('id',)
-        nested = True
+        depth = 1
 </code></pre>
-<p>The <code>nested</code> option may be set to either <code>True</code>, <code>False</code>, or an integer value.  If given an integer value it indicates the depth of relationships that should be traversed before reverting to a flat representation.</p>
-<p>When serializing objects using a nested representation any occurances of recursion will be recognised, and will fall back to using a flat representation.</p>
-<h2 id="customising-the-default-fields-used-by-a-modelserializer">Customising the default fields used by a ModelSerializer</h2>
-<pre class="prettyprint lang-py"><code>class AccountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-
+<p>The <code>depth</code> option should be set to an integer value that indicates the depth of relationships that should be traversed before reverting to a flat representation.</p>
+<h2 id="customising-the-default-fields">Customising the default fields</h2>
+<p>You can create customized subclasses of <code>ModelSerializer</code> that use a different set of default fields for the representation, by overriding various <code>get_&lt;field_type&gt;_field</code> methods.</p>
+<p>Each of these methods may either return a field or serializer instance, or <code>None</code>.</p>
+<h3 id="get_pk_field">get_pk_field</h3>
+<p><strong>Signature</strong>: <code>.get_pk_field(self, model_field)</code></p>
+<p>Returns the field instance that should be used to represent the pk field.</p>
+<h3 id="get_nested_field">get_nested_field</h3>
+<p><strong>Signature</strong>: <code>.get_nested_field(self, model_field)</code></p>
+<p>Returns the field instance that should be used to represent a related field when <code>depth</code> is specified as being non-zero.</p>
+<h3 id="get_related_field">get_related_field</h3>
+<p><strong>Signature</strong>: <code>.get_related_field(self, model_field, to_many=False)</code></p>
+<p>Returns the field instance that should be used to represent a related field when <code>depth</code> is not specified, or when nested representations are being used and the depth reaches zero.</p>
+<h3 id="get_field">get_field</h3>
+<p><strong>Signature</strong>: <code>.get_field(self, model_field)</code></p>
+<p>Returns the field instance that should be used for non-relational, non-pk fields.</p>
+<h3 id="example">Example:</h3>
+<p>The following custom model serializer could be used as a base class for model serializers that should always exclude the pk by default.</p>
+<pre class="prettyprint lang-py"><code>class NoPKModelSerializer(serializers.ModelSerializer):
     def get_pk_field(self, model_field):
-        return serializers.Field(readonly=True)
-
-    def get_nested_field(self, model_field):
-        return serializers.ModelSerializer()
-
-    def get_related_field(self, model_field, to_many=False):
-        queryset = model_field.rel.to._default_manager
-        if to_many:
-            return serializers.ManyRelatedField(queryset=queryset)
-        return serializers.RelatedField(queryset=queryset)
-
-    def get_field(self, model_field):
-        return serializers.ModelField(model_field=model_field)
+        return None
 </code></pre>
           </div><!--/span-->
         </div><!--/row-->

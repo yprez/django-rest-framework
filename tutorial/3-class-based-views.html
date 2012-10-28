@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -142,70 +141,68 @@
 <p>We can also write our API views using class based views, rather than function based views.  As we'll see this is a powerful pattern that allows us to reuse common functionality, and helps us keep our code <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a>.</p>
 <h2 id="rewriting-our-api-using-class-based-views">Rewriting our API using class based views</h2>
 <p>We'll start by rewriting the root view as a class based view.  All this involves is a little bit of refactoring.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
+<pre class="prettyprint lang-py"><code>from snippet.models import Snippet
+from snippet.serializers import SnippetSerializer
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-class CommentRoot(APIView):
+class SnippetList(APIView):
     """
-    List all comments, or create a new comment.
+    List all snippets, or create a new snippet.
     """
     def get(self, request, format=None):
-        comments = Comment.objects.all()
-        serializer = CommentSerializer(instance=comments)
+        snippets = Snippet.objects.all()
+        serializer = SnippetSerializer(instance=snippets)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = CommentSerializer(request.DATA)
+        serializer = SnippetSerializer(request.DATA)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 </code></pre>
 <p>So far, so good.  It looks pretty similar to the previous case, but we've got better separation between the different HTTP methods.  We'll also need to update the instance view. </p>
-<pre class="prettyprint lang-py"><code>class CommentInstance(APIView):
+<pre class="prettyprint lang-py"><code>class SnippetDetail(APIView):
     """
-    Retrieve, update or delete a comment instance.
+    Retrieve, update or delete a snippet instance.
     """
 
     def get_object(self, pk):
         try:
-            return Comment.objects.get(pk=pk)
-        except Comment.DoesNotExist:
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):
-        comment = self.get_object(pk)
-        serializer = CommentSerializer(instance=comment)
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(instance=snippet)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        comment = self.get_object(pk)
-        serializer = CommentSerializer(request.DATA, instance=comment)
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(request.DATA, instance=snippet)
         if serializer.is_valid():
-            comment = serializer.object
-            comment.save()
+            serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        comment = self.get_object(pk)
-        comment.delete()
+        snippet = self.get_object(pk)
+        snippet.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 </code></pre>
 <p>That's looking good.  Again, it's still pretty similar to the function based view right now.</p>
 <p>We'll also need to refactor our URLconf slightly now we're using class based views.</p>
 <pre class="prettyprint lang-py"><code>from django.conf.urls import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
-from blogpost import views
+from snippetpost import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.CommentRoot.as_view()),
-    url(r'^(?P&lt;pk&gt;[0-9]+)$', views.CommentInstance.as_view())
+    url(r'^$', views.SnippetList.as_view()),
+    url(r'^(?P&lt;pk&gt;[0-9]+)$', views.SnippetDetail.as_view())
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
@@ -215,16 +212,16 @@ urlpatterns = format_suffix_patterns(urlpatterns)
 <p>One of the big wins of using class based views is that it allows us to easily compose reusable bits of behaviour.</p>
 <p>The create/retrieve/update/delete operations that we've been using so far are going to be pretty simliar for any model-backed API views we create.  Those bits of common behaviour are implemented in REST framework's mixin classes.</p>
 <p>Let's take a look at how we can compose our views by using the mixin classes.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
+<pre class="prettyprint lang-py"><code>from snippet.models import Snippet
+from snippet.serializers import SnippetSerializer
 from rest_framework import mixins
 from rest_framework import generics
 
-class CommentRoot(mixins.ListModelMixin,
+class SnippetList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.MultipleObjectBaseView):
-    model = Comment
-    serializer_class = CommentSerializer
+    model = Snippet
+    serializer_class = SnippetSerializer
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -234,12 +231,12 @@ class CommentRoot(mixins.ListModelMixin,
 </code></pre>
 <p>We'll take a moment to examine exactly what's happening here - We're building our view using <code>MultipleObjectBaseView</code>, and adding in <code>ListModelMixin</code> and <code>CreateModelMixin</code>.</p>
 <p>The base class provides the core functionality, and the mixin classes provide the <code>.list()</code> and <code>.create()</code> actions.  We're then explicitly binding the <code>get</code> and <code>post</code> methods to the appropriate actions.  Simple enough stuff so far.</p>
-<pre class="prettyprint lang-py"><code>class CommentInstance(mixins.RetrieveModelMixin,
-                      mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
-                      generics.SingleObjectBaseView):
-    model = Comment
-    serializer_class = CommentSerializer
+<pre class="prettyprint lang-py"><code>class SnippetDetail(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.SingleObjectBaseView):
+    model = Snippet
+    serializer_class = SnippetSerializer
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -253,20 +250,20 @@ class CommentRoot(mixins.ListModelMixin,
 <p>Pretty similar.  This time we're using the <code>SingleObjectBaseView</code> class to provide the core functionality, and adding in mixins to provide the <code>.retrieve()</code>, <code>.update()</code> and <code>.destroy()</code> actions.</p>
 <h2 id="using-generic-class-based-views">Using generic class based views</h2>
 <p>Using the mixin classes we've rewritten the views to use slightly less code than before, but we can go one step further.  REST framework provides a set of already mixed-in generic views that we can use.</p>
-<pre class="prettyprint lang-py"><code>from blog.models import Comment
-from blog.serializers import CommentSerializer
+<pre class="prettyprint lang-py"><code>from snippet.models import Snippet
+from snippet.serializers import SnippetSerializer
 from rest_framework import generics
 
-class CommentRoot(generics.ListCreateAPIView):
-    model = Comment
-    serializer_class = CommentSerializer
+class SnippetList(generics.ListCreateAPIView):
+    model = Snippet
+    serializer_class = SnippetSerializer
 
-class CommentInstance(generics.RetrieveUpdateDestroyAPIView):
-    model = Comment
-    serializer_class = CommentSerializer
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Snippet
+    serializer_class = SnippetSerializer
 </code></pre>
 <p>Wow, that's pretty concise.  We've got a huge amount for free, and our code looks like good, clean, idiomatic Django.</p>
-<p>Next we'll move onto <a href="4-authentication-permissions-and-throttling">part 4 of the tutorial</a>, where we'll take a look at how we can  customize the behavior of our views to support a range of authentication, permissions, throttling and other aspects.</p>
+<p>Next we'll move onto <a href="4-authentication-and-permissions">part 4 of the tutorial</a>, where we'll take a look at how we can deal with authentication and permissions for our API.</p>
           </div><!--/span-->
         </div><!--/row-->
       </div><!--/.fluid-container-->

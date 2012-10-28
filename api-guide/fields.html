@@ -57,9 +57,8 @@
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/1-serialization">1 - Serialization</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/2-requests-and-responses">2 - Requests and responses</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/3-class-based-views">3 - Class based views</a></li>
-                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-permissions-and-throttling">4 - Authentication, permissions and throttling</a></li>
+                  <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/4-authentication-and-permissions">4 - Authentication and permissions</a></li>
                   <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/5-relationships-and-hyperlinked-apis">5 - Relationships and hyperlinked APIs</a></li>
-                  <!-- <li><a href="http://tomchristie.github.com/django-rest-framework/tutorial/6-resource-orientated-projects">6 - Resource orientated projects</a></li> -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -129,6 +128,7 @@
             <div id="table-of-contents">
               <ul class="nav nav-list side-nav well sidebar-nav-fixed">
                 <li class="main"><a href="#serializer-fields">Serializer fields</a></li>
+<li><a href="#core-arguments">Core arguments</a></li>
 <li class="main"><a href="#generic-fields">Generic Fields</a></li>
 <li><a href="#field">Field</a></li>
 <li><a href="#writablefield">WritableField</a></li>
@@ -165,6 +165,29 @@
 <p>Serializer fields handle converting between primative values and internal datatypes.  They also deal with validating input values, as well as retrieving and setting the values from their parent objects.</p>
 <hr />
 <p><strong>Note:</strong> The serializer fields are declared in fields.py, but by convention you should import them using <code>from rest_framework import serializers</code> and refer to fields as <code>serializers.&lt;FieldName&gt;</code>.</p>
+<hr />
+<h2 id="core-arguments">Core arguments</h2>
+<p>Each serializer field class constructor takes at least these arguments. Some Field classes take additional, field-specific arguments, but the following should always be accepted:</p>
+<h3 id="source"><code>source</code></h3>
+<p>The name of the attribute that will be used to populate the field.  May be a method that only takes a <code>self</code> argument, such as <code>Field(source='get_absolute_url')</code>, or may use dotted notation to traverse attributes, such as <code>Field(source='user.email')</code>.</p>
+<p>The value <code>source='*'</code> has a special meaning, and is used to indicate that the entire object should be passed through to the field.  This can be useful for creating nested representations.  (See the implementation of the <code>PaginationSerializer</code> class for an example.)</p>
+<p>Defaults to the name of the field.</p>
+<h3 id="read_only"><code>read_only</code></h3>
+<p>Set this to <code>True</code> to ensure that the field is used when serializing a representation, but is not used when updating an instance dureing deserialization.</p>
+<p>Defaults to <code>False</code></p>
+<h3 id="required"><code>required</code></h3>
+<p>Normally an error will be raised if a field is not supplied during deserialization.
+Set to false if this field is not required to be present during deserialization.</p>
+<p>Defaults to <code>True</code>.</p>
+<h3 id="default"><code>default</code></h3>
+<p>If set, this gives the default value that will be used for the field if none is supplied.  If not set the default behaviour is to not populate the attribute at all.</p>
+<h3 id="validators"><code>validators</code></h3>
+<p>A list of Django validators that should be used to validate deserialized values.</p>
+<h3 id="error_messages"><code>error_messages</code></h3>
+<p>A dictionary of error codes to error messages.</p>
+<h3 id="widget"><code>widget</code></h3>
+<p>Used only if rendering the field to HTML.
+This argument sets the widget that should be used to render the field.</p>
 <hr />
 <h1 id="generic-fields">Generic Fields</h1>
 <p>These generic fields are used for representing arbitrary model fields or the output of model methods.</p>
@@ -290,16 +313,25 @@ class Bookmark(models.Model):
 }
 </code></pre>
 <h2 id="primarykeyrelatedfield">PrimaryKeyRelatedField</h2>
-<p>As with <code>RelatedField</code> field can be applied to any "to-one" relationship, such as a <code>ForeignKey</code> field.</p>
+<p>This field can be applied to any "to-one" relationship, such as a <code>ForeignKey</code> field.</p>
 <p><code>PrimaryKeyRelatedField</code> will represent the target of the field using it's primary key.</p>
-<p>Be default, <code>PrimaryKeyRelatedField</code> is read-write, although you can change this behaviour using the <code>readonly</code> flag.</p>
+<p>Be default, <code>PrimaryKeyRelatedField</code> is read-write, although you can change this behaviour using the <code>read_only</code> flag.</p>
 <h2 id="manyprimarykeyrelatedfield">ManyPrimaryKeyRelatedField</h2>
-<p>As with <code>RelatedField</code> field can be applied to any "to-many" relationship, such as a <code>ManyToManyField</code> field, or a reverse <code>ForeignKey</code> relationship.</p>
-<p><code>PrimaryKeyRelatedField</code> will represent the target of the field using their primary key.</p>
-<p>Be default, <code>ManyPrimaryKeyRelatedField</code> is read-write, although you can change this behaviour using the <code>readonly</code> flag.</p>
+<p>This field can be applied to any "to-many" relationship, such as a <code>ManyToManyField</code> field, or a reverse <code>ForeignKey</code> relationship.</p>
+<p><code>PrimaryKeyRelatedField</code> will represent the targets of the field using their primary key.</p>
+<p>Be default, <code>ManyPrimaryKeyRelatedField</code> is read-write, although you can change this behaviour using the <code>read_only</code> flag.</p>
 <h2 id="hyperlinkedrelatedfield">HyperlinkedRelatedField</h2>
+<p>This field can be applied to any "to-one" relationship, such as a <code>ForeignKey</code> field.</p>
+<p><code>HyperlinkedRelatedField</code> will represent the target of the field using a hyperlink.  You must include a named URL pattern in your URL conf, with a name like <code>'{model-name}-detail'</code> that corresponds to the target of the hyperlink.</p>
+<p>Be default, <code>HyperlinkedRelatedField</code> is read-write, although you can change this behaviour using the <code>read_only</code> flag.</p>
 <h2 id="manyhyperlinkedrelatedfield">ManyHyperlinkedRelatedField</h2>
+<p>This field can be applied to any "to-many" relationship, such as a <code>ManyToManyField</code> field, or a reverse <code>ForeignKey</code> relationship.</p>
+<p><code>ManyHyperlinkedRelatedField</code> will represent the targets of the field using hyperlinks.  You must include a named URL pattern in your URL conf, with a name like <code>'{model-name}-detail'</code> that corresponds to the target of the hyperlink.</p>
+<p>Be default, <code>ManyHyperlinkedRelatedField</code> is read-write, although you can change this behaviour using the <code>read_only</code> flag.</p>
 <h2 id="hyperlinkedidentityfield">HyperLinkedIdentityField</h2>
+<p>This field can be applied as an identity relationship, such as the <code>'url'</code> field on  a HyperlinkedModelSerializer.</p>
+<p>You must include a named URL pattern in your URL conf, with a name like <code>'{model-name}-detail'</code> that corresponds to the model.</p>
+<p>This field is always read-only.</p>
           </div><!--/span-->
         </div><!--/row-->
       </div><!--/.fluid-container-->
