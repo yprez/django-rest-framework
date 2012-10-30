@@ -219,7 +219,7 @@ This method is used to enforce permissions and throttling, and perform content n
 </blockquote>
 <p>REST framework also allows you to work with regular function based views. It provides a set of simple decorators that wrap your function based views to ensure they receive an instance of <code>Request</code> (rather than the usual Django <code>HttpRequest</code>) and allows them to return a <code>Response</code> (instead of a Django <code>HttpResponse</code>), and allow you to configure how the request is processed.</p>
 <h2 id="api_view">@api_view()</h2>
-<p><strong>Signature:</strong> `@api_view(http_method_names)</p>
+<p><strong>Signature:</strong> <code>@api_view(http_method_names)</code></p>
 <p>The core of this functionality is the <code>api_view</code> decorator, which takes a list of HTTP methods that your view should respond to. For example, this is how you would write a very simple view that just manually returns some data:</p>
 <pre class="prettyprint lang-py"><code>from rest_framework.decorators import api_view
 

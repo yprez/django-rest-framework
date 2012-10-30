@@ -177,7 +177,7 @@
         return Response(content)
 </code></pre>
 <p>Or, if you're using the <code>@api_view</code> decorator with function based views.</p>
-<pre class="prettyprint lang-py"><code>@api_view(('GET',)),
+<pre class="prettyprint lang-py"><code>@api_view(['GET'])
 @authentication_classes((SessionAuthentication, UserBasicAuthentication))
 @permissions_classes((IsAuthenticated,))
 def example_view(request, format=None):

@@ -250,7 +250,6 @@ class CommentSerializer(serializers.Serializer):
     """
     A color represented in the RGB colorspace.
     """
-
     def __init__(self, red, green, blue):
         assert(red &gt;= 0 and green &gt;= 0 and blue &gt;= 0)
         assert(red &lt; 256 and green &lt; 256 and blue &lt; 256)
@@ -260,7 +259,6 @@ class ColourField(serializers.WritableField):
     """
     Color objects are serialized into "rgb(#, #, #)" notation.
     """
-
     def to_native(self, obj):
         return "rgb(%d, %d, %d)" % (obj.red, obj.green, obj.blue)
 

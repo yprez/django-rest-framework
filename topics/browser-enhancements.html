@@ -140,10 +140,12 @@
             <h1 id="browser-enhancements">Browser enhancements</h1>
 <blockquote>
 <p>"There are two noncontroversial uses for overloaded POST.  The first is to <em>simulate</em> HTTP's uniform interface for clients like web browsers that don't support PUT or DELETE"</p>
-<p>&mdash; <a href="1">RESTful Web Services</a>, Leonard Richardson &amp; Sam Ruby.</p>
+<p>&mdash; <a href="http://www.amazon.com/Restful-Web-Services-Leonard-Richardson/dp/0596529260">RESTful Web Services</a>, Leonard Richardson &amp; Sam Ruby.</p>
 </blockquote>
 <h2 id="browser-based-put-delete-etc">Browser based PUT, DELETE, etc...</h2>
-<p><strong>TODO: Preamble.</strong>  Note that this is the same strategy as is used in <a href="2">Ruby on Rails</a>.</p>
+<p>REST framework supports browser-based <code>PUT</code>, <code>DELETE</code> and other methods, by
+overloading <code>POST</code> requests using a hidden form field.</p>
+<p>Note that this is the same strategy as is used in <a href="http://guides.rubyonrails.org/form_helpers.html#how-do-forms-with-put-or-delete-methods-work">Ruby on Rails</a>.</p>
 <p>For example, given the following form:</p>
 <pre class="prettyprint lang-py"><code>&lt;form action="/news-items/5" method="POST"&gt;
     &lt;input type="hidden" name="_method" value="DELETE"&gt;
@@ -151,18 +153,32 @@
 </code></pre>
 <p><code>request.method</code> would return <code>"DELETE"</code>.</p>
 <h2 id="browser-based-submission-of-non-form-content">Browser based submission of non-form content</h2>
-<p>Browser-based submission of content types other than form are supported by using form fields named <code>_content</code> and <code>_content_type</code>:</p>
+<p>Browser-based submission of content types other than form are supported by
+using form fields named <code>_content</code> and <code>_content_type</code>:</p>
 <p>For example, given the following form:</p>
 <pre class="prettyprint lang-py"><code>&lt;form action="/news-items/5" method="PUT"&gt;
     &lt;input type="hidden" name="_content_type" value="application/json"&gt;
     &lt;input name="_content" value="{'count': 1}"&gt;
 &lt;/form&gt;
 </code></pre>
-<p><code>request.content_type</code> would return <code>"application/json"</code>, and <code>request.stream</code> would return <code>"{'count': 1}"</code></p>
+<p><code>request.content_type</code> would return <code>"application/json"</code>, and
+<code>request.stream</code> would return <code>"{'count': 1}"</code></p>
 <h2 id="url-based-accept-headers">URL based accept headers</h2>
+<p>REST framework can take <code>?accept=application/json</code> style URL parameters,
+which allow the <code>Accept</code> header to be overridden.</p>
+<p>This can be useful for testing the API from a web browser, where you don't
+have any control over what is sent in the <code>Accept</code> header.</p>
 <h2 id="url-based-format-suffixes">URL based format suffixes</h2>
+<p>REST framework can take <code>?format=json</code> style URL parameters, which can be a
+useful shortcut for determing which content type should be returned from
+the view.</p>
+<p>This is a more concise than using the <code>accept</code> override, but it also gives
+you less control.  (For example you can't specify any media type parameters)</p>
 <h2 id="doesnt-html5-support-put-and-delete-forms">Doesn't HTML5 support PUT and DELETE forms?</h2>
-<p>Nope.  It was at one point intended to support <code>PUT</code> and <code>DELETE</code> forms, but was later <a href="3">dropped from the spec</a>.  There remains <a href="4">ongoing discussion</a> about adding support for <code>PUT</code> and <code>DELETE</code>, as well as how to support content types other than form-encoded data.</p>
+<p>Nope.  It was at one point intended to support <code>PUT</code> and <code>DELETE</code> forms, but
+was later <a href="http://www.w3.org/TR/html5-diff/#changes-2010-06-24">dropped from the spec</a>.  There remains
+<a href="http://amundsen.com/examples/put-delete-forms/">ongoing discussion</a> about adding support for <code>PUT</code> and <code>DELETE</code>,
+as well as how to support content types other than form-encoded data.</p>
           </div><!--/span-->
         </div><!--/row-->
       </div><!--/.fluid-container-->

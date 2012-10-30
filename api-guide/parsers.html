@@ -173,7 +173,7 @@ sending more complex data than simple forms</p>
         return Response({'received data': request.DATA})
 </code></pre>
 <p>Or, if you're using the <code>@api_view</code> decorator with function based views.</p>
-<pre class="prettyprint lang-py"><code>@api_view(('POST',)),
+<pre class="prettyprint lang-py"><code>@api_view(['POST'])
 @parser_classes((YAMLParser,))
 def example_view(request, format=None):
     """

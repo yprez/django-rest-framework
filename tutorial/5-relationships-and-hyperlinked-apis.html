@@ -130,6 +130,7 @@
 <li><a href="#creating-an-endpoint-for-the-highlighted-snippets">Creating an endpoint for the highlighted snippets</a></li>
 <li><a href="#hyperlinking-our-api">Hyperlinking our API</a></li>
 <li><a href="#making-sure-our-url-patterns-are-named">Making sure our URL patterns are named</a></li>
+<li><a href="#adding-pagination">Adding pagination</a></li>
 <li><a href="#reviewing-our-work">Reviewing our work</a></li>
 <li><a href="#onwards-and-upwards">Onwards and upwards</a></li>
 
@@ -197,7 +198,7 @@ We'll add a url pattern for our new API root:</p>
 <p>We can easily re-write our existing serializers to use hyperlinking.</p>
 <pre class="prettyprint lang-py"><code>class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.Field(source='owner.username')
-    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight')
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
 
     class Meta:
         model = models.Snippet
@@ -212,6 +213,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'username', 'snippets')
 </code></pre>
 <p>Notice that we've also added a new <code>'highlight'</code> field.  This field is of the same type as the <code>url</code> field, except that it points to the <code>'snippet-highlight'</code> url pattern, instead of the <code>'snippet-detail'</code> url pattern.</p>
+<p>Because we've included format suffixed URLs such as <code>'.json'</code>, we also need to indicate on the <code>highlight</code> field that any format suffixed hyperlinks it returns should use the <code>'.html'</code> suffix.</p>
 <h2 id="making-sure-our-url-patterns-are-named">Making sure our URL patterns are named</h2>
 <p>If we're going to have a hyperlinked API, we need to make sure we name our URL patterns.  Let's take a look at which URL patterns we need to name.</p>
 <ul>
@@ -247,12 +249,21 @@ urlpatterns += patterns('',
                                namespace='rest_framework'))
 )
 </code></pre>
+<h2 id="adding-pagination">Adding pagination</h2>
+<p>The list views for users and code snippets could end up returning quite a lot of instances, so really we'd like to make sure we paginate the results, and allow the API client to step through each of the individual pages.</p>
+<p>We can change the default list style to use pagination, by modifying our <code>settings.py</code> file slightly.  Add the following setting:</p>
+<pre class="prettyprint lang-py"><code>REST_FRAMEWORK = {
+    'PAGINATE_BY': 10
+}
+</code></pre>
+<p>Note that settings in REST framework are all namespaced into a single dictionary setting, named 'REST_FRAMEWORK', which helps keep them well seperated from your other project settings.</p>
+<p>We could also customize the pagination style if we needed too, but in this case we'll just stick with the default.</p>
 <h2 id="reviewing-our-work">Reviewing our work</h2>
 <p>If we open a browser and navigate to the browseable API, you'll find that you can now work your way around the API simply by following links.</p>
 <p>You'll also be able to see the 'highlight' links on the snippet instances, that will take you to the hightlighted code HTML representations.</p>
 <p>We've now got a complete pastebin Web API, which is fully web browseable, and comes complete with authentication, per-object permissions, and multiple renderer formats.</p>
 <p>We've walked through each step of the design process, and seen how if we need to customize anything we can gradually work our way down to simply using regular Django views.</p>
-<p>You can review the final <a href="https://github.com/tomchristie/rest-framework-tutorial">tutorial code</a> on GitHub, or try out a live example in <a href="http://sultry-coast-6726.herokuapp.com/">the sandbox</a>. </p>
+<p>You can review the final <a href="https://github.com/tomchristie/rest-framework-tutorial">tutorial code</a> on GitHub, or try out a live example in <a href="http://restframework.herokuapp.com/">the sandbox</a>. </p>
 <h2 id="onwards-and-upwards">Onwards and upwards</h2>
 <p>We've reached the end of our tutorial.  If you want to get more involved in the REST framework project, here's a few places you can start:</p>
 <ul>

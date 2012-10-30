@@ -199,7 +199,7 @@ def example_view(request, format=None):
 <p>The <code>IsAuthenticated</code> permission class will deny permission to any unauthenticated user, and allow permission otherwise.</p>
 <p>This permission is suitable if you want your API to only be accessible to registered users.</p>
 <h2 id="isadminuser">IsAdminUser</h2>
-<p>The <code>IsAdminUser</code> permission class will deny permission to any user, unless <code>user.is_staff</code>is <code>True</code> in which case permission will be allowed.</p>
+<p>The <code>IsAdminUser</code> permission class will deny permission to any user, unless <code>user.is_staff</code> is <code>True</code> in which case permission will be allowed.</p>
 <p>This permission is suitable is you want your API to only be accessible to a subset of trusted administrators.</p>
 <h2 id="isauthenticatedorreadonly">IsAuthenticatedOrReadOnly</h2>
 <p>The <code>IsAuthenticatedOrReadOnly</code> will allow authenticated users to perform any request.  Requests for unauthorised users will only be permitted if the request method is one of the "safe" methods; <code>GET</code>, <code>HEAD</code> or <code>OPTIONS</code>.</p>

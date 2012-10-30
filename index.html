@@ -146,9 +146,15 @@
 <p><a href="http://travis-ci.org/tomchristie/django-rest-framework?branch=restframework2"><img alt="Travis build image" src="https://secure.travis-ci.org/tomchristie/django-rest-framework.png?branch=restframework2" /></a></p>
 <h1 id="django-rest-framework">Django REST framework</h1>
 <p><strong>A toolkit for building well-connected, self-describing Web APIs.</strong></p>
-<p><strong>WARNING: This documentation is for the 2.0 redesign of REST framework.  It is a work in progress.</strong></p>
+<hr />
+<p><strong>Note</strong>: This documentation is for the 2.0 version of REST framework.  If you are looking for earlier versions please see the <a href="https://github.com/tomchristie/django-rest-framework/tree/0.4.X">0.4.x branch</a> on GitHub.</p>
+<hr />
 <p>Django REST framework is a lightweight library that makes it easy to build Web APIs.  It is designed as a modular and easy to customize architecture, based on Django's class based views.</p>
 <p>Web APIs built using REST framework are fully self-describing and web browseable - a huge useability win for your developers.  It also supports a wide range of media types, authentication and permission policies out of the box.</p>
+<p>If you are considering using REST framework for your API, we recommend reading the <a href="topics/rest-framework-2-announcement">REST framework 2 announcment</a> which gives a good overview of the framework and it's capabilities.</p>
+<p>There is also a sandbox API you can use for testing purposes, <a href="http://restframework.herokuapp.com/">available here</a>.</p>
+<p><strong>Below</strong>: <em>Screenshot from the browseable API</em></p>
+<p><img alt="Screenshot" src="img/quickstart.png" /></p>
 <h2 id="requirements">Requirements</h2>
 <p>REST framework requires the following:</p>
 <ul>
@@ -161,7 +167,6 @@
 <li><a href="http://pypi.python.org/pypi/PyYAML">PyYAML</a> (3.10+) - YAML content-type support.</li>
 </ul>
 <h2 id="installation">Installation</h2>
-<p><strong>WARNING: These instructions will only become valid once this becomes the master version</strong></p>
 <p>Install using <code>pip</code>, including any optional packages you want...</p>
 <pre class="prettyprint lang-py"><code>pip install djangorestframework
 pip install markdown  # Recommended if using the browseable API.
