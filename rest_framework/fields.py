@@ -59,6 +59,7 @@ class Field(object):
         self.context = self.root.context
         if self.root.partial:
             self.required = False
+            self.default = None
 
     def field_from_native(self, data, files, field_name, into):
         """
