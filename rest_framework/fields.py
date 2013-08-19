@@ -399,11 +399,6 @@ class BooleanField(WritableField):
     }
     empty = False
 
-    # Note: we set default to `False` in order to fill in missing value not
-    # supplied by html form.  TODO: Fix so that only html form input gets
-    # this behavior.
-    default = False
-
     def from_native(self, value):
         if value in ('true', 't', 'True', '1'):
             return True
